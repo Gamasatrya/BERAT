@@ -1,0 +1,34 @@
+{
+  "hero": {
+    "badge": "Lembaga Pelatihan Terakreditasi",
+    "title": "Menjadi Pusat Pelatihan Pengoperasian Alat Berat Terpercaya di Indonesia",
+    "subtitle": "Menyediakan pelatihan operator alat berat yang profesional, berstandar nasional, serta didukung instruktur berpengalaman untuk mencetak tenaga kerja yang kompeten, aman, dan siap kerja.",
+    "btnPrimary": "Lihat Program",
+    "btnOutline": "Hubungi Kami"
+  },
+  "about": {
+    "label": "Tentang Kami",
+    "title": "Membangun SDM Industri yang Kompeten & Profesional",
+    "desc1": "LPK Buwas Ikigai Nusantara merupakan lembaga pelatihan profesional yang berfokus pada peningkatan kompetensi operator alat berat di berbagai sektor industri seperti pertambangan, konstruksi, perkebunan, kehutanan, hingga migas.",
+    "desc2": "Kami menghadirkan program pelatihan berbasis praktik lapangan, simulasi operasional, dan standar keselamatan kerja (K3), sehingga setiap peserta memiliki kemampuan teknis maupun pemahaman keselamatan kerja sesuai kebutuhan industri.",
+    "desc3": "Dengan didukung instruktur berpengalaman dan fasilitas pelatihan yang lengkap, kami berkomitmen mencetak operator alat berat yang kompeten, produktif, dan siap bersaing di dunia kerja.",
+    "experience": "20+"
+  },
+  "visi_misi": {
+    "visi": "Menjadi lembaga pelatihan alat berat terbaik di Indonesia yang menghasilkan tenaga kerja profesional, kompeten, dan berintegritas.",
+    "misi": [
+      "Menyelenggarakan pelatihan berkualitas tinggi.",
+      "Mengutamakan keselamatan kerja (Safety First).",
+      "Mengembangkan kompetensi SDM industri.",
+      "Menyediakan instruktur bersertifikasi.",
+      "Menjalin kemitraan dengan perusahaan nasional maupun internasional."
+    ]
+  },
+  "contact_info": {
+    "address": "Jl. Raya Industri No. 88, Bekasi, Jawa Barat",
+    "phone": "+62 812-3456-7890",
+    "email": "info@heti.co.id",
+    "hours": "Senin – Jumat\n08.00 – 17.00 WIB",
+    "whatsapp": "6281234567890"
+  }
+}

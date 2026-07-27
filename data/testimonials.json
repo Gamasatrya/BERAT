@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Ahmad Fauzi",
+    "program": "Peserta Excavator Batch 48",
+    "text": "Materinya sangat lengkap dan praktiknya langsung menggunakan alat berat. Instrukturnya sangat sabar dan profesional dalam membimbing kami.",
+    "rating": 5,
+    "avatar": "A"
+  },
+  {
+    "name": "Budi Santoso",
+    "program": "Peserta Bulldozer Batch 52",
+    "text": "Instrukturnya profesional dan mudah dipahami. Fasilitas pelatihannya juga sangat lengkap, membuat saya lebih percaya diri dalam mengoperasikan alat berat.",
+    "rating": 5,
+    "avatar": "B"
+  },
+  {
+    "name": "Rizky Pratama",
+    "program": "Peserta Crane Batch 45",
+    "text": "Setelah mengikuti pelatihan saya langsung diterima bekerja di salah satu perusahaan tambang besar. Terima kasih BIN!",
+    "rating": 5,
+    "avatar": "R"
+  }
+]

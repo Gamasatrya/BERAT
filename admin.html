@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — BIN</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="dark-theme">
+
+  <!-- ============================================
+       LOGIN CONTAINER
+       ============================================ -->
+  <div id="login-container" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand-logo">B</div>
+        <h2>BIN <span>Admin</span></h2>
+        <p>Silakan masuk untuk mengelola konten website</p>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" class="form-control" placeholder="Masukkan username" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="Masukkan password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <i data-lucide="log-in" style="width:18px;height:18px"></i> Masuk
+        </button>
+        <div id="login-error" class="alert alert-danger" style="display: none; margin-top: 1rem;"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================
+       MAIN DASHBOARD LAYOUT
+       ============================================ -->
+  <div id="admin-layout" class="admin-layout" style="display: none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header" style="display: flex; align-items: center; gap: 10px; padding: 20px;">
+        <img src="assets/images/logo.png" alt="BIN Logo" style="height: 40px; width: auto; object-fit: contain;">
+        <div style="display: flex; flex-direction: column;">
+          <h3 style="margin: 0; font-size: 1.2rem; color: white;">BIN <span style="color: var(--primary);">Admin</span></h3>
+          <span style="font-size: 0.7rem; color: #9CA3AF;">Buwas Ikigai Nusantara</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <a href="#dashboard" class="menu-item active" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a href="#content" class="menu-item" data-tab="content">
+          <i data-lucide="edit-3"></i> Kelola Konten
+        </a>
+        <a href="#media" class="menu-item" data-tab="media">
+          <i data-lucide="image"></i> Media Manager
+        </a>
+        <a href="#submissions" class="menu-item" data-tab="submissions">
+          <i data-lucide="inbox"></i> Pesan Masuk
+          <span class="badge badge-unread" id="unread-count" style="display: none;">0</span>
+        </a>
+        <a href="#settings" class="menu-item" data-tab="settings">
+          <i data-lucide="settings"></i> Pengaturan
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="avatar">AD</div>
+          <div>
+            <h4 id="user-display">Administrator</h4>
+            <p>Role: Super Admin</p>
+          </div>
+        </div>
+        <button id="logout-btn" class="btn btn-outline-danger btn-sm btn-block">
+          <i data-lucide="log-out"></i> Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1 id="page-title">Dashboard</h1>
+        <div class="header-actions">
+          <a href="/" target="_blank" class="btn btn-outline btn-sm">
+            <i data-lucide="external-link"></i> Lihat Website
+          </a>
+        </div>
+      </header>
+
+      <!-- ============================================
+           TAB: DASHBOARD
+           ============================================ -->
+      <section id="tab-dashboard" class="tab-panel">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon icon-blue"><i data-lucide="inbox"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-submissions">0</h3>
+              <p>Total Pesan Masuk</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-orange"><i data-lucide="mail-warning"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-unread">0</h3>
+              <p>Pesan Belum Dibaca</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-green"><i data-lucide="image"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-media">0</h3>
+              <p>Total Media/Gambar</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions & Info -->
+        <div class="dashboard-grid">
+          <!-- Recent submissions -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Pesan Masuk Terbaru</h3>
+              <a href="#submissions" class="btn-link" onclick="switchTab('submissions')">Lihat Semua</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Pengirim</th>
+                    <th>Program</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-submissions-body">
+                  <tr>
+                    <td colspan="5" class="text-center">Tidak ada pesan masuk baru</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Shortcuts -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Pintasan Cepat</h3>
+            </div>
+            <div class="shortcuts-grid">
+              <button class="shortcut-card" onclick="switchTab('content')">
+                <i data-lucide="edit-3"></i>
+                <span>Edit Hero Banner</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('content')">
+                <i data-lucide="users"></i>
+                <span>Kelola Testimoni</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('media')">
+                <i data-lucide="upload-cloud"></i>
+                <span>Upload Media</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('settings')">
+                <i data-lucide="lock"></i>
+                <span>Ganti Password</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: CONTENT MANAGER
+           ============================================ -->
+      <section id="tab-content" class="tab-panel" style="display: none;">
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" data-subtab="content-hero">Hero Section</button>
+          <button class="sub-tab-btn" data-subtab="content-about">Tentang Kami</button>
+          <button class="sub-tab-btn" data-subtab="content-visi-misi">Visi & Misi</button>
+          <button class="sub-tab-btn" data-subtab="content-testimonials">Testimoni</button>
+          <button class="sub-tab-btn" data-subtab="content-faq">FAQ</button>
+          <button class="sub-tab-btn" data-subtab="content-contact">Info Kontak</button>
+        </div>
+
+        <!-- Form Hero Section -->
+        <div id="subtab-content-hero" class="subtab-panel">
+          <div class="panel">
+            <h3>Kelola Hero Banner</h3>
+            <form id="form-hero">
+              <div class="form-group">
+                <label for="hero-badge">Badge Teks</label>
+                <input type="text" id="hero-badge" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="hero-title">Headline</label>
+                <input type="text" id="hero-title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="hero-subtitle">Subheadline</label>
+                <textarea id="hero-subtitle" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="grid-2" style="display: grid; gap: 1rem;">
+                <div class="form-group">
+                  <label for="hero-btn-primary">Teks Tombol Utama</label>
+                  <input type="text" id="hero-btn-primary" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label for="hero-btn-outline">Teks Tombol Kedua</label>
+                  <input type="text" id="hero-btn-outline" class="form-control" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Perubahan</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Form Tentang Kami -->
+        <div id="subtab-content-about" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Tentang Kami</h3>
+            <form id="form-about">
+              <div class="form-group">
+                <label for="about-title">Judul Utama</label>
+                <input type="text" id="about-title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="about-experience">Tahun Pengalaman (Angka)</label>
+                <input type="text" id="about-experience" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="about-desc1">Paragraf 1</label>
+                <textarea id="about-desc1" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="about-desc2">Paragraf 2</label>
+                <textarea id="about-desc2" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="about-desc3">Paragraf 3</label>
+                <textarea id="about-desc3" class="form-control" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Perubahan</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Form Visi & Misi -->
+        <div id="subtab-content-visi-misi" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Visi & Misi</h3>
+            <form id="form-visi-misi">
+              <div class="form-group">
+                <label for="visi-text">Pernyataan Visi</label>
+                <textarea id="visi-text" class="form-control" rows="3" required></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>Daftar Misi</label>
+                <div id="misi-list-inputs" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                  <!-- Dynamic missions inputs -->
+                </div>
+                <button type="button" id="add-misi-btn" class="btn btn-sm btn-outline-success">
+                  <i data-lucide="plus"></i> Tambah Misi
+                </button>
+              </div>
+              
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Perubahan</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Testimonials Manager -->
+        <div id="subtab-content-testimonials" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Kelola Testimoni</h3>
+              <button type="button" id="add-testimonial-btn" class="btn btn-primary btn-sm">
+                <i data-lucide="plus"></i> Tambah Testimoni Baru
+              </button>
+            </div>
+            
+            <div id="testimonials-list-container" class="testimonials-list">
+              <!-- Dynamically populated card manager -->
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ Manager -->
+        <div id="subtab-content-faq" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Kelola Pertanyaan & Jawaban (FAQ)</h3>
+              <button type="button" id="add-faq-btn" class="btn btn-primary btn-sm">
+                <i data-lucide="plus"></i> Tambah FAQ Baru
+              </button>
+            </div>
+            
+            <div id="faq-list-container" class="faq-list">
+              <!-- Dynamically populated FAQ manager -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Contact Info -->
+        <div id="subtab-content-contact" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Informasi Kontak</h3>
+            <form id="form-contact">
+              <div class="form-group">
+                <label for="contact-address">Alamat Kantor</label>
+                <textarea id="contact-address" class="form-control" rows="2" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="contact-phone">Nomor Telepon</label>
+                <input type="text" id="contact-phone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="contact-email">Email Kantor</label>
+                <input type="email" id="contact-email" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="contact-hours">Jam Operasional (Gunakan baris baru)</label>
+                <textarea id="contact-hours" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="contact-whatsapp">WhatsApp ID (Format: 628xxxxxxxxxx tanpa + atau 0)</label>
+                <input type="text" id="contact-whatsapp" class="form-control" required>
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Perubahan</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: MEDIA MANAGER
+           ============================================ -->
+      <section id="tab-media" class="tab-panel" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Upload Media Baru</h3>
+          </div>
+          
+          <!-- File upload drag and drop area -->
+          <div class="upload-dropzone" id="upload-dropzone">
+            <i data-lucide="upload-cloud" style="width: 48px; height: 48px; color: var(--text-light); margin-bottom: 1rem;"></i>
+            <p>Tarik & Lepaskan gambar di sini atau klik untuk memilih file</p>
+            <p class="small" style="color: var(--text-light); margin-top: 0.25rem;">Format diperbolehkan: JPG, PNG, WebP (Maks 5MB)</p>
+            <input type="file" id="media-file-input" style="display: none;" accept="image/*">
+          </div>
+          <div id="upload-progress-container" class="upload-progress-container" style="display: none;">
+            <p id="upload-status-text">Mengupload...</p>
+            <div class="progress-bar-wrapper">
+              <div id="upload-progress-bar" class="progress-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 2rem;">
+          <div class="panel-header">
+            <h3>Perpustakaan Media</h3>
+            <button id="refresh-media-btn" class="btn btn-outline btn-sm"><i data-lucide="refresh-cw"></i> Refresh</button>
+          </div>
+          
+          <div id="media-gallery-grid" class="media-gallery-grid">
+            <!-- Media list populated dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: FORM SUBMISSIONS
+           ============================================ -->
+      <section id="tab-submissions" class="tab-panel" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Daftar Pesan Masuk</h3>
+            <div style="display: flex; gap: 0.5rem;">
+              <button id="export-csv-btn" class="btn btn-outline-success btn-sm">
+                <i data-lucide="download"></i> Ekspor CSV
+              </button>
+              <button id="refresh-submissions-btn" class="btn btn-outline btn-sm">
+                <i data-lucide="refresh-cw"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Nama Pengirim</th>
+                  <th>Email</th>
+                  <th>Telepon</th>
+                  <th>Program Minat</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="submissions-table-body">
+                <!-- Submissions populating dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: SETTINGS
+           ============================================ -->
+      <section id="tab-settings" class="tab-panel" style="display: none;">
+        <div class="panel">
+          <h3>Pengaturan Website</h3>
+          <form id="form-site-settings">
+            <div class="form-group">
+              <label for="settings-title">Judul Website (SEO)</label>
+              <input type="text" id="settings-title" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="settings-description">Meta Deskripsi (SEO)</label>
+              <textarea id="settings-description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="settings-username">Username Administrator</label>
+              <input type="text" id="settings-username" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Pengaturan</button>
+          </form>
+        </div>
+
+        <div class="panel" style="margin-top: 2rem;">
+          <h3>Keamanan (Ganti Password)</h3>
+          <form id="form-change-password">
+            <div class="form-group">
+              <label for="password-old">Password Lama</label>
+              <input type="password" id="password-old" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="password-new">Password Baru</label>
+              <input type="password" id="password-new" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="password-confirm">Konfirmasi Password Baru</label>
+              <input type="password" id="password-confirm" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-orange"><i data-lucide="key"></i> Ganti Password</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============================================
+       SUBMISSION DETAIL DIALOG (MODAL)
+       ============================================ -->
+  <div id="submission-modal" class="modal" role="dialog" aria-modal="true" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Detail Pesan Masuk</h3>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="detail-table">
+          <tr>
+            <th>Tanggal Masuk</th>
+            <td id="modal-date"></td>
+          </tr>
+          <tr>
+            <th>Nama Pengirim</th>
+            <td id="modal-name"></td>
+          </tr>
+          <tr>
+            <th>Email</th>
+            <td id="modal-email"></td>
+          </tr>
+          <tr>
+            <th>Telepon</th>
+            <td id="modal-phone"></td>
+          </tr>
+          <tr>
+            <th>Program Diminati</th>
+            <td id="modal-program"></td>
+          </tr>
+          <tr>
+            <th>Isi Pesan</th>
+            <td>
+              <div class="modal-message-box" id="modal-message"></div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-mark-read-btn" class="btn btn-primary btn-sm">Tandai Sudah Dibaca</button>
+        <button id="modal-delete-btn" class="btn btn-outline-danger btn-sm">Hapus Pesan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Alert/Toast -->
+  <div id="toast" class="toast" style="display: none;">Pesan sukses</div>
+
+  <!-- Scripts -->
+  <script src="js/admin/admin-app.js"></script>
+</body>
+</html>
