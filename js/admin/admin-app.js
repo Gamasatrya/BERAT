@@ -128,8 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        await window._firebaseAuth.signInWithEmailAndPassword(emailToTry, passwordInput);
+        const userCredential = await window._firebaseAuth.signInWithEmailAndPassword(emailToTry, passwordInput);
+        token = "firebase-session-active";
+        if (userCredential && userCredential.user && userDisplay) {
+          userDisplay.textContent = (userCredential.user.email || emailToTry).split('@')[0];
+        }
         showToast('Selamat datang kembali!');
+        showAdminLayout();
+        loadAllData();
       } catch (err) {
         console.error('Login error:', err);
         let finalErrorMsg = 'Login gagal: Periksa email/username dan password.';
@@ -159,6 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.addEventListener('click', async () => {
       try {
         await window._firebaseAuth.signOut();
+        token = null;
+        showLoginView();
         showToast('Anda telah keluar.');
       } catch (err) {
         console.error('Logout error:', err);
