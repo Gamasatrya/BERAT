@@ -139,6 +139,12 @@ document.addEventListener('DOMContentLoaded', () => {
           finalErrorMsg = 'Format email tidak valid.';
         } else if (err.code === 'auth/too-many-requests') {
           finalErrorMsg = 'Terlalu banyak percobaan gagal. Coba lagi beberapa saat lagi.';
+        } else if (
+          err.code === 'auth/configuration-not-found' || 
+          err.code === 'auth/operation-not-allowed' || 
+          (err.message && err.message.includes('configuration-not-found'))
+        ) {
+          finalErrorMsg = 'Metode Login Email/Password belum diaktifkan di Firebase Console. Buka Firebase Console > Authentication > Sign-in method dan aktifkan "Email/Password".';
         } else if (err.message) {
           finalErrorMsg = 'Login gagal: ' + err.message;
         }
