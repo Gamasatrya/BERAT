@@ -66,6 +66,10 @@
         <a href="#content" class="menu-item" data-tab="content">
           <i data-lucide="edit-3"></i> Kelola Konten
         </a>
+        <a href="#articles" class="menu-item" data-tab="articles">
+          <i data-lucide="newspaper"></i> Artikel
+          <span class="badge badge-unread" id="articles-count" style="display: none;">0</span>
+        </a>
         <a href="#media" class="menu-item" data-tab="media">
           <i data-lucide="image"></i> Media Manager
         </a>
@@ -128,6 +132,13 @@
             <div class="stat-info">
               <h3 id="stat-media">0</h3>
               <p>Total Media/Gambar</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(139,92,246,0.15); color: #8b5cf6;"><i data-lucide="newspaper"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-articles">0</h3>
+              <p>Total Artikel</p>
             </div>
           </div>
         </div>
@@ -470,6 +481,140 @@
   </div>
 
   <!-- ============================================
+       TAB: ARTICLES MANAGER (FIREBASE)
+       ============================================ -->
+  <!-- Panel ini di-append via JS karena perlu berada di dalam #admin-layout -->
+  <template id="tab-articles-template">
+    <section id="tab-articles" class="tab-panel" style="display: none;">
+
+      <!-- Toolbar -->
+      <div class="panel" style="margin-bottom: 1.5rem;">
+        <div class="panel-header">
+          <h3><i data-lucide="newspaper" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"></i>Manajemen Artikel</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <span id="articles-firebase-status" style="font-size:0.75rem;color:var(--text-light);"></span>
+            <button id="add-article-btn" class="btn btn-primary btn-sm">
+              <i data-lucide="plus"></i> Artikel Baru
+            </button>
+            <button id="refresh-articles-btn" class="btn btn-outline btn-sm">
+              <i data-lucide="refresh-cw"></i> Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Tambah/Edit Artikel -->
+      <div class="panel" id="article-form-panel" style="display: none; margin-bottom: 1.5rem;">
+        <h3 id="article-form-title">Tambah Artikel Baru</h3>
+
+        <form id="form-article">
+          <input type="hidden" id="article-edit-id" value="">
+
+          <div class="form-group">
+            <label for="article-title">Judul Artikel <span style="color:var(--danger);">*</span></label>
+            <input type="text" id="article-title" class="form-control" placeholder="Masukkan judul artikel" required>
+          </div>
+
+          <div class="form-group">
+            <label for="article-excerpt">Ringkasan / Excerpt</label>
+            <textarea id="article-excerpt" class="form-control" rows="2" placeholder="Ringkasan singkat artikel (opsional)"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="article-content">Konten Artikel <span style="color:var(--danger);">*</span></label>
+            <textarea id="article-content" class="form-control" rows="10" placeholder="Tulis konten artikel di sini..." required></textarea>
+          </div>
+
+          <!-- Upload Gambar -->
+          <div class="form-group">
+            <label>Gambar Artikel (Firebase Storage)</label>
+            <div class="upload-dropzone" id="article-img-dropzone" style="padding:1.5rem;">
+              <i data-lucide="image-plus" style="width:36px;height:36px;color:var(--text-light);margin-bottom:0.75rem;"></i>
+              <p>Klik atau drag gambar ke sini</p>
+              <p class="small" style="color:var(--text-light);margin-top:0.25rem;">Format: JPG, JPEG, PNG, WEBP (Maks 5MB)</p>
+              <input type="file" id="article-img-input" style="display:none;" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+            </div>
+            <!-- Upload progress -->
+            <div id="article-upload-progress" style="display:none; margin-top:0.75rem;">
+              <p id="article-upload-status" style="font-size:0.85rem;color:var(--text-light);margin-bottom:0.5rem;">Mengupload...</p>
+              <div class="progress-bar-wrapper">
+                <div id="article-upload-bar" class="progress-bar" style="width:0%;"></div>
+              </div>
+            </div>
+            <!-- Preview gambar -->
+            <div id="article-img-preview-wrap" style="display:none; margin-top:0.75rem;">
+              <img id="article-img-preview" src="" alt="Preview" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--border-color);object-fit:cover;">
+              <div style="margin-top:0.5rem;display:flex;gap:0.5rem;align-items:center;">
+                <input type="text" id="article-imageUrl" class="form-control" placeholder="URL gambar dari Firebase Storage" style="flex:1;">
+                <button type="button" id="article-img-remove" class="btn btn-outline-danger btn-sm">Hapus Gambar</button>
+              </div>
+            </div>
+            <!-- Field URL manual (jika belum upload) -->
+            <div id="article-img-url-field" style="margin-top:0.5rem;">
+              <input type="text" id="article-imageUrl-manual" class="form-control" placeholder="Atau masukkan URL gambar secara manual">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="article-status">Status Publikasi</label>
+            <select id="article-status" class="form-control">
+              <option value="draft">Draft (Tersimpan, tidak tampil di website)</option>
+              <option value="published">Published (Tampil di website)</option>
+            </select>
+          </div>
+
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary" id="article-submit-btn">
+              <i data-lucide="save"></i> Simpan Artikel
+            </button>
+            <button type="button" id="article-form-cancel" class="btn btn-outline">
+              <i data-lucide="x"></i> Batal
+            </button>
+          </div>
+
+          <div id="article-form-error" class="alert alert-danger" style="display:none; margin-top:1rem;"></div>
+        </form>
+      </div>
+
+      <!-- Tabel Daftar Artikel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Daftar Artikel</h3>
+        </div>
+
+        <!-- Loading state -->
+        <div id="articles-loading" style="text-align:center;padding:2.5rem;color:var(--text-light);">
+          <i data-lucide="loader" style="width:24px;height:24px;animation:spin 1s linear infinite;"></i>
+          <p style="margin-top:0.5rem;">Memuat artikel...</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="articles-error" style="display:none; padding:1.5rem;">
+          <div class="alert alert-danger" id="articles-error-msg"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive" id="articles-table-wrap" style="display:none;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Status</th>
+                <th>Tanggal Dibuat</th>
+                <th>Terakhir Diupdate</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="articles-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- ============================================
        SUBMISSION DETAIL DIALOG (MODAL)
        ============================================ -->
   <div id="submission-modal" class="modal" role="dialog" aria-modal="true" style="display: none;">
@@ -519,6 +664,13 @@
   <div id="toast" class="toast" style="display: none;">Pesan sukses</div>
 
   <!-- Scripts -->
+  <!-- Firebase Config (harus sebelum firebase-client.js) -->
+  <script src="js/firebase-config.js"></script>
+  <!-- Firebase Admin Client Helper -->
+  <script src="js/admin/firebase-client.js"></script>
+  <!-- Admin App (existing) -->
   <script src="js/admin/admin-app.js"></script>
+  <!-- Articles Controller (Firebase) -->
+  <script src="js/admin/articles-controller.js"></script>
 </body>
 </html>

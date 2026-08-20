@@ -21,6 +21,29 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/content', require('./routes/content'));
 app.use('/api/media', require('./routes/media'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/articles', require('./routes/articles')); // Firebase articles
+
+// Firebase Client Config endpoint (expose only public config, never expose service account)
+app.get('/api/firebase-config', (req, res) => {
+  const config = {
+    apiKey:            process.env.FIREBASE_API_KEY            || '',
+    authDomain:        process.env.FIREBASE_AUTH_DOMAIN        || '',
+    projectId:         process.env.FIREBASE_PROJECT_ID         || '',
+    storageBucket:     process.env.FIREBASE_STORAGE_BUCKET     || '',
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '',
+    appId:             process.env.FIREBASE_APP_ID             || ''
+  };
+
+  // Cek apakah Firebase sudah dikonfigurasi
+  if (!config.projectId) {
+    return res.status(503).json({
+      configured: false,
+      message: 'Firebase belum dikonfigurasi. Isi FIREBASE_PROJECT_ID di .env'
+    });
+  }
+
+  res.json(config);
+});
 
 // Serve public static files (from the project root)
 app.use(express.static(path.join(__dirname, '../')));

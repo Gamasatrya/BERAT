@@ -684,6 +684,24 @@
     </section>
 
     <!-- ============================================
+         ARTIKEL (Firebase Firestore)
+         Section ini hanya tampil jika ada artikel published.
+         Disembunyikan otomatis jika Firebase belum dikonfigurasi atau tidak ada artikel.
+         ============================================ -->
+    <section class="section" id="articles-section" aria-label="Artikel" style="display:none;">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-badge">Artikel & Informasi</span>
+          <h2 class="section-title">Berita & <span class="highlight">Artikel</span> Terbaru</h2>
+          <p class="section-subtitle">Informasi terkini seputar dunia alat berat, tips operator, dan karir di industri</p>
+        </div>
+        <div id="articles-grid" class="articles-grid">
+          <!-- Populated by firebase-articles.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
          12. CALL TO ACTION
          ============================================ -->
     <section class="cta" id="cta" aria-label="Call to Action">
@@ -915,5 +933,7 @@
 
   <!-- Scripts -->
   <script src="js/app.js"></script>
+  <!-- Firebase Articles (non-blocking, graceful fallback) -->
+  <script src="js/firebase-articles.js"></script>
 </body>
 </html>
