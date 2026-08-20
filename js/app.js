@@ -19,9 +19,42 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================================
   async function loadDynamicContent() {
     try {
-      const response = await fetch('/api/content');
-      if (!response.ok) throw new Error('API unreachable');
-      const data = await response.json();
+      // Ensure Firebase is initialized
+      if (!window._firebaseDb && window.initFirebase) {
+        await window.initFirebase();
+      }
+
+      // Fallback object structure
+      const data = {
+        content: {},
+        gallery: [],
+        testimonials: [],
+        partners: [
+          { name: "Partner 1" }, { name: "Partner 2" }, { name: "Partner 3" }, { name: "Partner 4" }, { name: "Partner 5" }
+        ], // Static dummy for now as it wasn't editable in admin
+        faq: []
+      };
+
+      if (window._firebaseDb) {
+        // Load sections
+        const sectionsDoc = await window._firebaseDb.collection('content').doc('sections').get();
+        if (sectionsDoc.exists) data.content = sectionsDoc.data();
+
+        // Load testimonials
+        const testimonialsDoc = await window._firebaseDb.collection('content').doc('testimonials').get();
+        if (testimonialsDoc.exists) data.testimonials = testimonialsDoc.data().list || [];
+
+        // Load FAQ
+        const faqDoc = await window._firebaseDb.collection('content').doc('faqs').get();
+        if (faqDoc.exists) data.faq = faqDoc.data().list || [];
+
+        // Load Gallery Media
+        const mediaSnapshot = await window._firebaseDb.collection('media_metadata').orderBy('uploadedAt', 'desc').get();
+        data.gallery = mediaSnapshot.docs.map(doc => {
+          const item = doc.data();
+          return { src: item.url, alt: item.name, title: item.name, desc: '' };
+        });
+      }
       
       renderHero(data.content.hero);
       renderAbout(data.content.about);
@@ -602,14 +635,19 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-          const res = await fetch('/api/contact', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-          });
-          
-          if (!res.ok) throw new Error('Gagal mengirim pesan');
+          // Ensure Firebase is initialized
+          if (!window._firebaseDb && window.initFirebase) {
+            await window.initFirebase();
+          }
 
+          if (window._firebaseDb) {
+            formData.createdAt = new Date().toISOString();
+            formData.read = false;
+            await window._firebaseDb.collection('contact_submissions').add(formData);
+          } else {
+            throw new Error('Firebase DB not initialized');
+          }
+          
           // Show success message
           formSuccess.classList.add('show');
           contactForm.reset();
@@ -619,6 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formSuccess.classList.remove('show');
           }, 5000);
         } catch (err) {
+          console.error(err);
           alert('Gagal mengirim pesan. Silakan coba kembali beberapa saat lagi.');
         }
       }

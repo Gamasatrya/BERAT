@@ -53,35 +53,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ============================================
-  // Authentication & Session
+  // Authentication & Session (Firebase Auth)
   // ============================================
+  let authInitialized = false;
+
   async function checkSession() {
-    if (!token) {
-      showLoginView();
-      return;
+    // Wait for Firebase to initialize if it hasn't
+    if (!window._firebaseAuth) {
+      if (!window.initFirebase) {
+        showToast('Firebase configuration missing.', 'danger');
+        return;
+      }
+      try {
+        await window.initFirebase();
+      } catch (err) {
+        showToast('Gagal memuat Firebase.', 'danger');
+        return;
+      }
     }
 
-    try {
-      const res = await fetch('/api/auth/verify', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+    if (authInitialized) return;
 
-      if (res.ok) {
-        const data = await res.json();
-        userDisplay.textContent = data.username;
+    window._firebaseAuth.onAuthStateChanged(user => {
+      authInitialized = true;
+      if (user) {
+        // Logged in
+        token = "firebase-session-active";
+        userDisplay.textContent = user.email.split('@')[0];
         showAdminLayout();
         loadAllData();
       } else {
-        localStorage.removeItem('heti_admin_token');
+        // Not logged in
         token = null;
         showLoginView();
       }
-    } catch (err) {
-      console.error('Session check failed:', err);
-      // If server is offline, keep the layout but warn the admin
-      showToast('Koneksi ke server gagal, menggunakan cache lokal.', 'danger');
-      showAdminLayout();
-    }
+    });
   }
 
   function showLoginView() {
@@ -101,31 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       loginError.style.display = 'none';
 
-      const usernameInput = document.getElementById('login-username').value;
+      const emailInput = document.getElementById('login-username').value;
       const passwordInput = document.getElementById('login-password').value;
 
       try {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: usernameInput, password: passwordInput })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          token = data.token;
-          localStorage.setItem('heti_admin_token', token);
-          userDisplay.textContent = data.username;
-          showToast('Selamat datang kembali!');
-          showAdminLayout();
-          loadAllData();
-        } else {
-          loginError.textContent = data.message || 'Login gagal';
-          loginError.style.display = 'block';
-        }
+        await window._firebaseAuth.signInWithEmailAndPassword(emailInput, passwordInput);
+        showToast('Selamat datang kembali!');
       } catch (err) {
-        loginError.textContent = 'Server tidak merespons. Pastikan backend server aktif.';
+        console.error('Login error:', err);
+        loginError.textContent = 'Login gagal: Periksa email dan password.';
         loginError.style.display = 'block';
       }
     });
@@ -133,11 +123,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle Logout
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('heti_admin_token');
-      token = null;
-      showToast('Anda telah keluar.');
-      showLoginView();
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await window._firebaseAuth.signOut();
+        showToast('Anda telah keluar.');
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
     });
   }
 
@@ -209,39 +201,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadStats() {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
       // Load recent submissions list
-      const subRes = await fetch('/api/contact', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (subRes.ok) {
-        submissionsList = await subRes.json();
-        
-        // Count unread
-        const unreadCount = submissionsList.filter(s => !s.read).length;
-        document.getElementById('stat-submissions').textContent = submissionsList.length;
-        document.getElementById('stat-unread').textContent = unreadCount;
-        
-        // Update sidebar badge
-        if (unreadCount > 0) {
-          unreadBadge.textContent = unreadCount;
-          unreadBadge.style.display = 'inline-block';
-        } else {
-          unreadBadge.style.display = 'none';
-        }
-
-        renderRecentSubmissionsDashboard();
+      const subSnapshot = await window._firebaseDb.collection('contact_submissions').orderBy('createdAt', 'desc').get();
+      submissionsList = subSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // Count unread
+      const unreadCount = submissionsList.filter(s => !s.read).length;
+      document.getElementById('stat-submissions').textContent = submissionsList.length;
+      document.getElementById('stat-unread').textContent = unreadCount;
+      
+      // Update sidebar badge
+      if (unreadCount > 0) {
+        unreadBadge.textContent = unreadCount;
+        unreadBadge.style.display = 'inline-block';
+      } else {
+        unreadBadge.style.display = 'none';
       }
+
+      renderRecentSubmissionsDashboard();
 
       // Load media list
-      const mediaRes = await fetch('/api/media', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (mediaRes.ok) {
-        mediaList = await mediaRes.json();
-        document.getElementById('stat-media').textContent = mediaList.length;
-      }
+      const mediaSnapshot = await window._firebaseDb.collection('media_metadata').orderBy('uploadedAt', 'desc').get();
+      mediaList = mediaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      document.getElementById('stat-media').textContent = mediaList.length;
+      
     } catch (err) {
       console.error('Stats loading failed', err);
     }
@@ -251,10 +236,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // TAB CONTROLLER: CONTENT SECTIONS
   // ============================================
   async function loadContentSections() {
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/content/sections');
-      if (res.ok) {
-        contentData = await res.json();
+      const doc = await window._firebaseDb.collection('content').doc('sections').get();
+      if (doc.exists) {
+        contentData = doc.data();
         populateContentForms();
       }
     } catch (err) {
@@ -338,23 +324,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const formContact = document.getElementById('form-contact');
 
   async function updateContentData() {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/content/sections', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(contentData)
-      });
-      if (res.ok) {
-        showToast('Konten sections berhasil disimpan!');
-      } else {
-        showToast('Gagal menyimpan konten', 'danger');
-      }
+      await window._firebaseDb.collection('content').doc('sections').set(contentData);
+      showToast('Konten sections berhasil disimpan!');
     } catch (err) {
-      showToast('Error menyambung ke server', 'danger');
+      console.error(err);
+      showToast('Error menyimpan ke database', 'danger');
     }
   }
 
@@ -427,9 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadTestimonials() {
     try {
-      const res = await fetch('/api/content/testimonials');
-      if (res.ok) {
-        testimonialsList = await res.json();
+      const doc = await window._firebaseDb.collection('content').doc('testimonials').get();
+      if (doc.exists) {
+        testimonialsList = doc.data().list || [];
         renderTestimonialsEditor();
       }
     } catch (err) {
@@ -506,22 +482,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function saveTestimonials(showFeedback = true) {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/content/testimonials', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(testimonialsList)
-      });
-      if (res.ok && showFeedback) {
+      await window._firebaseDb.collection('content').doc('testimonials').set({ list: testimonialsList });
+      if (showFeedback) {
         showToast('Testimoni berhasil disimpan!');
         loadTestimonials();
       }
     } catch (err) {
       if (showFeedback) showToast('Gagal menyimpan testimoni', 'danger');
+      console.error(err);
     }
   }
 
@@ -546,10 +516,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const addFaqBtn = document.getElementById('add-faq-btn');
 
   async function loadFaqs() {
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/content/faq');
-      if (res.ok) {
-        faqList = await res.json();
+      const doc = await window._firebaseDb.collection('content').doc('faqs').get();
+      if (doc.exists) {
+        faqList = doc.data().list || [];
         renderFaqEditor();
       }
     } catch (err) {
@@ -606,22 +577,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function saveFaq(showFeedback = true) {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/content/faq', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(faqList)
-      });
-      if (res.ok && showFeedback) {
+      await window._firebaseDb.collection('content').doc('faqs').set({ list: faqList });
+      if (showFeedback) {
         showToast('FAQ berhasil disimpan!');
         loadFaqs();
       }
     } catch (err) {
       if (showFeedback) showToast('Gagal menyimpan FAQ', 'danger');
+      console.error(err);
     }
   }
 
@@ -649,15 +614,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadStatusText = document.getElementById('upload-status-text');
 
   async function loadMedia() {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/media', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        mediaList = await res.json();
-        renderMediaGallery();
-      }
+      const snapshot = await window._firebaseDb.collection('media_metadata').orderBy('uploadedAt', 'desc').get();
+      mediaList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderMediaGallery();
     } catch (err) {
       console.error('Media load failed', err);
     }
@@ -710,19 +671,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = btn.getAttribute('data-id');
         if (confirm('Apakah Anda yakin ingin menghapus gambar ini secara permanen?')) {
           try {
-            const res = await fetch(`/api/media/${id}`, {
-              method: 'DELETE',
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-              showToast('Media berhasil dihapus');
-              loadMedia();
-              loadStats();
-            } else {
-              showToast('Gagal menghapus media', 'danger');
+            // Find media doc
+            const doc = await window._firebaseDb.collection('media_metadata').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              // Delete from storage if path exists
+              if (data.storagePath) {
+                const storageRef = window._firebaseStorage.ref(data.storagePath);
+                await storageRef.delete().catch(() => {});
+              }
+              // Delete metadata from firestore
+              await window._firebaseDb.collection('media_metadata').doc(id).delete();
             }
+            showToast('Media berhasil dihapus');
+            loadMedia();
+            loadStats();
           } catch (err) {
-            showToast('Error server', 'danger');
+            console.error(err);
+            showToast('Gagal menghapus media', 'danger');
           }
         }
       });
@@ -766,54 +732,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function uploadFile(file) {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     
     uploadProgressContainer.style.display = 'block';
     uploadProgressBar.style.width = '0%';
     uploadStatusText.textContent = `Mengupload ${file.name}...`;
 
-    const formData = new FormData();
-    formData.append('image', file);
-
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/media/upload', true);
-      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      const filename = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const storagePath = `uploads/${filename}`;
+      const storageRef = window._firebaseStorage.ref(storagePath);
+      
+      const uploadTask = storageRef.put(file);
 
-      // Progress Tracker
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const percent = (e.loaded / e.total) * 100;
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           uploadProgressBar.style.width = `${percent}%`;
-        }
-      };
+        }, 
+        (err) => {
+          console.error('Upload error:', err);
+          uploadProgressContainer.style.display = 'none';
+          showToast('Upload gagal', 'danger');
+        }, 
+        async () => {
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+          
+          // Save metadata to Firestore
+          await window._firebaseDb.collection('media_metadata').add({
+            name: file.name,
+            url: downloadURL,
+            storagePath: storagePath,
+            size: file.size,
+            uploadedAt: new Date().toISOString()
+          });
 
-      xhr.onload = () => {
-        uploadProgressContainer.style.display = 'none';
-        if (xhr.status === 201) {
+          uploadProgressContainer.style.display = 'none';
           showToast('Gambar berhasil diupload!');
           loadMedia();
           loadStats();
-        } else {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            showToast(data.message || 'Upload gagal', 'danger');
-          } catch (err) {
-            showToast('Upload gagal', 'danger');
-          }
         }
-      };
-
-      xhr.onerror = () => {
-        uploadProgressContainer.style.display = 'none';
-        showToast('Koneksi ke server gagal', 'danger');
-      };
-
-      xhr.send(formData);
+      );
 
     } catch (err) {
+      console.error(err);
       uploadProgressContainer.style.display = 'none';
-      showToast('Error menyambung ke server', 'danger');
+      showToast('Error saat upload file', 'danger');
     }
   }
 
@@ -828,16 +792,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportCsvBtn = document.getElementById('export-csv-btn');
 
   async function loadSubmissions() {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch('/api/contact', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        submissionsList = await res.json();
-        renderSubmissionsTable();
-        loadStats(); // keep badge and counters fresh
-      }
+      const snapshot = await window._firebaseDb.collection('contact_submissions').orderBy('createdAt', 'desc').get();
+      submissionsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderSubmissionsTable();
+      loadStats(); // keep badge and counters fresh
     } catch (err) {
       console.error('Submissions load failed', err);
     }
@@ -981,13 +941,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function markSubmissionRead(id, reload = true) {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch(`/api/contact/${id}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok && reload) {
+      await window._firebaseDb.collection('contact_submissions').doc(id).update({ read: true });
+      if (reload) {
         showToast('Pesan ditandai sebagai dibaca');
         loadSubmissions();
       }
@@ -997,49 +954,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function deleteSubmission(id) {
-    if (!token) return;
+    if (token !== "firebase-session-active") return;
     try {
-      const res = await fetch(`/api/contact/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        showToast('Pesan berhasil dihapus');
-        loadSubmissions();
-      } else {
-        showToast('Gagal menghapus pesan', 'danger');
-      }
+      await window._firebaseDb.collection('contact_submissions').doc(id).delete();
+      showToast('Pesan berhasil dihapus');
+      loadSubmissions();
     } catch (err) {
-      showToast('Error server', 'danger');
+      console.error(err);
+      showToast('Gagal menghapus pesan', 'danger');
     }
   }
 
   if (exportCsvBtn) {
     exportCsvBtn.addEventListener('click', () => {
-      if (!token) return;
-      // Download directly by creating a form or hitting endpoint with token in header.
-      // Since window.open doesn't support headers, we must download using fetch and anchor tag.
-      fetch('/api/contact/export', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('Export failed');
-        return res.blob();
-      })
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = 'pesan_masuk_heti.csv';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
+      if (token !== "firebase-session-active") return;
+      try {
+        if (!submissionsList || submissionsList.length === 0) {
+          showToast('Tidak ada data untuk diekspor', 'danger');
+          return;
+        }
+        
+        let csvContent = "data:text/csv;charset=utf-8,ID,Tanggal,Nama,Email,Telepon,Program,Status,Pesan\n";
+        submissionsList.forEach(s => {
+          const row = [
+            s.id,
+            `"${s.createdAt || ''}"`,
+            `"${(s.name || '').replace(/"/g, '""')}"`,
+            `"${(s.email || '').replace(/"/g, '""')}"`,
+            `"${(s.phone || '').replace(/"/g, '""')}"`,
+            `"${(s.program || '').replace(/"/g, '""')}"`,
+            s.read ? 'Dibaca' : 'Belum Dibaca',
+            `"${(s.message || '').replace(/"/g, '""')}"`
+          ].join(",");
+          csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "pesan_masuk_heti.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
         showToast('File CSV berhasil diekspor!');
-      })
-      .catch(err => {
+      } catch (err) {
+        console.error(err);
         showToast('Gagal mengekspor CSV', 'danger');
-      });
+      }
     });
   }
 
@@ -1053,12 +1015,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadSettings() {
     try {
-      const res = await fetch('/api/auth/settings');
-      if (res.ok) {
-        const data = await res.json();
+      const doc = await window._firebaseDb.collection('settings').doc('site').get();
+      if (doc.exists) {
+        const data = doc.data();
         document.getElementById('settings-title').value = data.siteTitle || '';
         document.getElementById('settings-description').value = data.metaDescription || '';
-        document.getElementById('settings-username').value = localStorage.getItem('heti_admin_username') || 'admin';
+      }
+      if (window._firebaseAuth && window._firebaseAuth.currentUser) {
+        document.getElementById('settings-username').value = window._firebaseAuth.currentUser.email;
       }
     } catch (err) {
       console.error('Settings load failed', err);
@@ -1068,33 +1032,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formSiteSettings) {
     formSiteSettings.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!token) return;
+      if (token !== "firebase-session-active") return;
 
       const siteTitle = document.getElementById('settings-title').value;
       const metaDescription = document.getElementById('settings-description').value;
-      const username = document.getElementById('settings-username').value;
 
       try {
-        const res = await fetch('/api/auth/settings', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ siteTitle, metaDescription, username })
-        });
+        await window._firebaseDb.collection('settings').doc('site').set({
+          siteTitle,
+          metaDescription,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
         
-        const data = await res.json();
-
-        if (res.ok) {
-          showToast(data.message || 'Pengaturan diperbarui!');
-          localStorage.setItem('heti_admin_username', data.settings.username);
-          userDisplay.textContent = data.settings.username;
-        } else {
-          showToast(data.message || 'Gagal menyimpan pengaturan', 'danger');
-        }
+        showToast('Pengaturan diperbarui!');
       } catch (err) {
-        showToast('Error server', 'danger');
+        console.error(err);
+        showToast('Gagal menyimpan pengaturan', 'danger');
       }
     });
   }
@@ -1102,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formChangePassword) {
     formChangePassword.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!token) return;
+      if (token !== "firebase-session-active" || !window._firebaseAuth.currentUser) return;
 
       const oldPassword = document.getElementById('password-old').value;
       const newPassword = document.getElementById('password-new').value;
@@ -1114,25 +1067,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const res = await fetch('/api/auth/password', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ oldPassword, newPassword })
-        });
+        const user = window._firebaseAuth.currentUser;
+        
+        // Re-authenticate user before changing password
+        const credential = window._firebaseAuth.EmailAuthProvider.credential(user.email, oldPassword);
+        await user.reauthenticateWithCredential(credential);
 
-        const data = await res.json();
+        // Update password
+        await user.updatePassword(newPassword);
 
-        if (res.ok) {
-          showToast('Password berhasil diubah!');
-          formChangePassword.reset();
-        } else {
-          showToast(data.message || 'Gagal mengubah password', 'danger');
-        }
+        showToast('Password berhasil diubah!');
+        formChangePassword.reset();
       } catch (err) {
-        showToast('Error server', 'danger');
+        console.error('Password change error:', err);
+        showToast('Gagal mengubah password. Pastikan password lama benar.', 'danger');
       }
     });
   }

@@ -150,21 +150,23 @@
       '</div>';
 
     try {
-      const res = await fetch('/api/articles');
-
-      if (!res.ok) {
-        // Jika Firebase belum dikonfigurasi (503), sembunyikan section
-        if (res.status === 503 || res.status === 500) {
-          section.style.display = 'none';
-          return;
-        }
-        throw new Error('HTTP ' + res.status);
+      if (!window._firebaseDb && window.initFirebase) {
+        await window.initFirebase();
       }
 
-      const articles = await res.json();
+      if (!window._firebaseDb) {
+        section.style.display = 'none';
+        return;
+      }
+
+      const snapshot = await window._firebaseDb.collection('articles')
+        .where('status', '==', 'published')
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       if (articles.length === 0) {
-        // Jika tidak ada artikel, sembunyikan section agar halaman tetap bersih
         section.style.display = 'none';
         return;
       }
@@ -172,7 +174,6 @@
       renderPublicArticles(articles, grid);
 
     } catch (err) {
-      // Jika gagal (server offline, dll), sembunyikan section dengan graceful
       console.log('[Firebase Articles] Tidak dapat memuat artikel:', err.message);
       section.style.display = 'none';
     }
