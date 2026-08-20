@@ -1,5 +1,5 @@
 /**
- * Firebase Client SDK Configuration
+ * Firebase Client SDK Configuration & Backward Compatibility Wrapper
  */
 
 window._firebaseApp = null;
@@ -30,14 +30,71 @@ async function initFirebase() {
 
     // Import Firebase modules (ESM via CDN)
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getAuth }       = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-    const { getFirestore }  = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const { getStorage }    = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
+    const { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      EmailAuthProvider 
+    } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const { 
+      getFirestore, 
+      collection, 
+      doc, 
+      getDocs, 
+      addDoc, 
+      updateDoc, 
+      deleteDoc, 
+      query, 
+      where, 
+      orderBy 
+    } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { getStorage } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
 
     const app     = initializeApp(firebaseConfig);
     const auth    = getAuth(app);
     const db      = getFirestore(app);
     const storage = getStorage(app);
+
+    // Backward-compatibility wrappers for Firebase Auth methods
+    auth.signInWithEmailAndPassword = (email, password) => signInWithEmailAndPassword(auth, email, password);
+    auth.signOut = () => signOut(auth);
+    auth.onAuthStateChanged = (callback) => onAuthStateChanged(auth, callback);
+    auth.EmailAuthProvider = EmailAuthProvider;
+
+    // Backward-compatibility wrappers for Firestore collection queries & CRUD
+    db.collection = (collectionName) => {
+      const createBuilder = (constraints = []) => {
+        return {
+          where: (field, op, val) => createBuilder([...constraints, where(field, op, val)]),
+          orderBy: (field, dir = 'asc') => createBuilder([...constraints, orderBy(field, dir)]),
+          get: async () => {
+            const q = constraints.length > 0 
+              ? query(collection(db, collectionName), ...constraints)
+              : collection(db, collectionName);
+            const snap = await getDocs(q);
+            return {
+              docs: snap.docs.map(docSnap => ({
+                id: docSnap.id,
+                data: () => docSnap.data()
+              }))
+            };
+          },
+          add: async (data) => {
+            const ref = await addDoc(collection(db, collectionName), data);
+            return { id: ref.id };
+          },
+          doc: (docId) => {
+            const docRef = doc(db, collectionName, docId);
+            return {
+              update: (data) => updateDoc(docRef, data),
+              delete: () => deleteDoc(docRef)
+            };
+          }
+        };
+      };
+      return createBuilder();
+    };
 
     window._firebaseApp     = app;
     window._firebaseAuth    = auth;

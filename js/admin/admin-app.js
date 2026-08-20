@@ -107,15 +107,42 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       loginError.style.display = 'none';
 
-      const emailInput = document.getElementById('login-username').value;
-      const passwordInput = document.getElementById('login-password').value;
+      let userInput = document.getElementById('login-username').value.trim();
+      const passwordInput = document.getElementById('login-password').value.trim();
+
+      // Ensure Firebase is initialized
+      if (!window._firebaseAuth) {
+        try {
+          await window.initFirebase();
+        } catch (err) {
+          loginError.textContent = 'Gagal memuat sistem Firebase. Periksa koneksi internet Anda.';
+          loginError.style.display = 'block';
+          return;
+        }
+      }
+
+      // If user typed simple username without @, attempt auto-domain fallback
+      let emailToTry = userInput;
+      if (!userInput.includes('@')) {
+        emailToTry = `${userInput}@heti.co.id`;
+      }
 
       try {
-        await window._firebaseAuth.signInWithEmailAndPassword(emailInput, passwordInput);
+        await window._firebaseAuth.signInWithEmailAndPassword(emailToTry, passwordInput);
         showToast('Selamat datang kembali!');
       } catch (err) {
         console.error('Login error:', err);
-        loginError.textContent = 'Login gagal: Periksa email dan password.';
+        let finalErrorMsg = 'Login gagal: Periksa email/username dan password.';
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+          finalErrorMsg = 'Email/username atau password salah.';
+        } else if (err.code === 'auth/invalid-email') {
+          finalErrorMsg = 'Format email tidak valid.';
+        } else if (err.code === 'auth/too-many-requests') {
+          finalErrorMsg = 'Terlalu banyak percobaan gagal. Coba lagi beberapa saat lagi.';
+        } else if (err.message) {
+          finalErrorMsg = 'Login gagal: ' + err.message;
+        }
+        loginError.textContent = finalErrorMsg;
         loginError.style.display = 'block';
       }
     });
