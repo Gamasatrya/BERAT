@@ -1,3 +1,16 @@
+# Dependencies
 node_modules/
+
+# Environment files
 .env
 .env.local
+.env.*.local
+
+# Logs and OS files
+*.log
+.DS_Store
+
+# Secrets & Service Accounts
+*serviceAccountKey*.json
+*service-account*.json
+*.pem
