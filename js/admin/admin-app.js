@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const targetSubtab = btn.getAttribute('data-subtab');
       subtabPanels.forEach(panel => {
-        panel.style.display = panel.id === targetSubtab ? 'block' : 'none';
+        panel.style.display = panel.id === `subtab-${targetSubtab}` ? 'block' : 'none';
       });
     });
   });
