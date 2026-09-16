@@ -1,27 +1,13 @@
 /**
- * Firebase Client SDK Configuration
- * 
- * Konfigurasi diambil dari server endpoint /api/firebase-config
- * agar API keys tidak ter-hardcode di source code frontend.
- * 
- * File ini digunakan oleh:
- *  - js/admin/firebase-client.js  (admin panel)
- *  - js/firebase-articles.js      (halaman publik)
+ * Firebase Client SDK Configuration & Backward Compatibility Wrapper
  */
 
-// Firebase config akan diisi oleh initFirebase() yang dipanggil
-// setelah config berhasil diambil dari server.
 window._firebaseApp = null;
 window._firebaseAuth = null;
 window._firebaseDb = null;
 window._firebaseStorage = null;
 
-/**
- * Ambil konfigurasi Firebase dari server dan inisialisasi SDK.
- * @returns {Promise<{app, auth, db, storage}>}
- */
 async function initFirebase() {
-  // Jika sudah diinisialisasi, kembalikan instance yang ada
   if (window._firebaseApp) {
     return {
       app:     window._firebaseApp,
@@ -32,23 +18,84 @@ async function initFirebase() {
   }
 
   try {
-    // Ambil config dari server (server mengambil dari .env)
-    const res = await fetch('/api/firebase-config');
-    if (!res.ok) throw new Error('Gagal mengambil konfigurasi Firebase dari server.');
-    const firebaseConfig = await res.json();
+    // Hardcoded Firebase Web SDK configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXW4U9Zlr_MWhcZrCNz62DSu9Ix2pjI6c",
+      authDomain: "buwas-ikigai-nusantara.firebaseapp.com",
+      projectId: "buwas-ikigai-nusantara",
+      storageBucket: "buwas-ikigai-nusantara.firebasestorage.app",
+      messagingSenderId: "617114927641",
+      appId: "1:617114927641:web:7e224c2d5e0677dbb96088"
+    };
 
     // Import Firebase modules (ESM via CDN)
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getAuth }       = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-    const { getFirestore }  = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const { getStorage }    = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
+    const { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      EmailAuthProvider 
+    } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const { 
+      getFirestore, 
+      collection, 
+      doc, 
+      getDocs, 
+      addDoc, 
+      updateDoc, 
+      deleteDoc, 
+      query, 
+      where, 
+      orderBy 
+    } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { getStorage } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
 
     const app     = initializeApp(firebaseConfig);
     const auth    = getAuth(app);
     const db      = getFirestore(app);
     const storage = getStorage(app);
 
-    // Simpan ke window agar dapat diakses oleh file lain
+    // Backward-compatibility wrappers for Firebase Auth methods
+    auth.signInWithEmailAndPassword = (email, password) => signInWithEmailAndPassword(auth, email, password);
+    auth.signOut = () => signOut(auth);
+    auth.onAuthStateChanged = (callback) => onAuthStateChanged(auth, callback);
+    auth.EmailAuthProvider = EmailAuthProvider;
+
+    // Backward-compatibility wrappers for Firestore collection queries & CRUD
+    db.collection = (collectionName) => {
+      const createBuilder = (constraints = []) => {
+        return {
+          where: (field, op, val) => createBuilder([...constraints, where(field, op, val)]),
+          orderBy: (field, dir = 'asc') => createBuilder([...constraints, orderBy(field, dir)]),
+          get: async () => {
+            const q = constraints.length > 0 
+              ? query(collection(db, collectionName), ...constraints)
+              : collection(db, collectionName);
+            const snap = await getDocs(q);
+            return {
+              docs: snap.docs.map(docSnap => ({
+                id: docSnap.id,
+                data: () => docSnap.data()
+              }))
+            };
+          },
+          add: async (data) => {
+            const ref = await addDoc(collection(db, collectionName), data);
+            return { id: ref.id };
+          },
+          doc: (docId) => {
+            const docRef = doc(db, collectionName, docId);
+            return {
+              update: (data) => updateDoc(docRef, data),
+              delete: () => deleteDoc(docRef)
+            };
+          }
+        };
+      };
+      return createBuilder();
+    };
+
     window._firebaseApp     = app;
     window._firebaseAuth    = auth;
     window._firebaseDb      = db;
@@ -61,5 +108,4 @@ async function initFirebase() {
   }
 }
 
-// Ekspos ke window
 window.initFirebase = initFirebase;
