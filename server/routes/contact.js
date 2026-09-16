@@ -69,8 +69,25 @@ router.post('/', async (req, res) => {
   try {
     const { name, email, phone, program, message, serviceType, serviceName, service } = req.body;
 
-    if (!name || !phone) {
-      return res.status(400).json({ message: 'Kolom Nama dan Telepon wajib diisi' });
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Kolom Nama Lengkap wajib diisi' });
+    }
+
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ message: 'Kolom Nomor Telepon / WhatsApp wajib diisi' });
+    }
+
+    const resolvedProgram = (program || service || '').trim();
+    if (!resolvedProgram) {
+      return res.status(400).json({ message: 'Pilihan layanan / program wajib dipilih' });
+    }
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ message: 'Kolom Pesan / detail kebutuhan wajib diisi' });
+    }
+
+    if (email && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({ message: 'Format email tidak valid' });
     }
 
     const resolvedServiceType = (serviceType || 'lpk').toLowerCase();

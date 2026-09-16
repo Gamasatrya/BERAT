@@ -362,19 +362,23 @@
             </div>
           </div>
           <div class="contact-form-wrapper reveal-right">
-            <form id="legal-contact-form" class="contact-form">
+            <form id="legal-contact-form" name="legal-contact" method="POST" data-netlify="true" class="contact-form">
+              <input type="hidden" name="form-name" value="legal-contact">
+              <input type="hidden" name="serviceType" value="legal">
+              <input type="hidden" name="serviceName" value="Konsultasi Hukum">
               <h3>Form Permintaan Konsultasi Hukum</h3>
               <div class="form-group">
-                <label>Nama Lengkap / Perusahaan</label>
-                <input type="text" class="form-control" placeholder="Nama Anda / Nama PT" required>
+                <label>Nama Lengkap / Perusahaan <span class="required" style="color:#ef4444;">*</span></label>
+                <input type="text" name="name" class="form-control" placeholder="Nama Anda / Nama PT" required>
               </div>
               <div class="form-group">
-                <label>Nomor WhatsApp/HP</label>
-                <input type="tel" class="form-control" placeholder="08xxxxxxxxxx" required>
+                <label>Nomor WhatsApp/HP <span class="required" style="color:#ef4444;">*</span></label>
+                <input type="tel" name="phone" class="form-control" placeholder="08xxxxxxxxxx" required>
               </div>
               <div class="form-group">
-                <label>Subjek Konsultasi</label>
-                <select class="form-control" required>
+                <label>Subjek Konsultasi <span class="required" style="color:#ef4444;">*</span></label>
+                <select name="program" class="form-control" required>
+                  <option value="" disabled selected>Pilih subjek konsultasi...</option>
                   <option value="Hukum Perusahaan">Hukum Perusahaan / Pendirian PT</option>
                   <option value="Legal Drafting / Contract">Review & Drafting Kontrak Bisnis</option>
                   <option value="Perizinan Usaha">Perizinan Usaha & HKI</option>
@@ -382,8 +386,8 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Ringkasan Masalah / Kebutuhan</label>
-                <textarea class="form-control" rows="3" placeholder="Gambarkan kebutuhan hukum Anda..." required></textarea>
+                <label>Ringkasan Masalah / Kebutuhan <span class="required" style="color:#ef4444;">*</span></label>
+                <textarea name="message" class="form-control" rows="3" placeholder="Gambarkan kebutuhan hukum Anda..." required></textarea>
               </div>
               <button type="submit" class="btn btn-primary btn-block" style="background:#8B5CF6;border-color:#8B5CF6;">Kirim Form Konsultasi</button>
             </form>
@@ -456,6 +460,7 @@
     </div>
   </div>
 
+  <script src="js/firebase-config.js"></script>
   <script src="js/bin-app.js"></script>
 </body>
 </html>

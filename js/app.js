@@ -663,37 +663,93 @@ document.addEventListener('DOMContentLoaded', () => {
           status: 'new'
         };
 
+        let isSuccess = false;
+
+        // 1. Try Firebase Firestore
         try {
-          // Ensure Firebase is initialized
           if (!window._firebaseDb && window.initFirebase) {
             await window.initFirebase();
           }
-
           if (window._firebaseDb) {
             formData.createdAt = new Date().toISOString();
             formData.read = false;
             await window._firebaseDb.collection('contact_submissions').add(formData);
-          } else {
-            throw new Error('Firebase DB not initialized');
+            isSuccess = true;
           }
-          
+        } catch (fbErr) {
+          console.warn('[LPK Form] Firebase save fallback:', fbErr.message);
+        }
+
+        // 2. Try /api/contact (Netlify function or Express)
+        if (!isSuccess) {
+          try {
+            const apiRes = await fetch('/api/contact', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            });
+            if (apiRes.ok) isSuccess = true;
+          } catch (apiErr) {
+            console.warn('[LPK Form] /api/contact fallback:', apiErr.message);
+          }
+        }
+
+        // 3. Try Netlify Forms native POST
+        if (!isSuccess) {
+          try {
+            const netlifyParams = new URLSearchParams();
+            netlifyParams.append('form-name', contactForm.getAttribute('name') || 'lpk-contact');
+            netlifyParams.append('name', formData.name);
+            netlifyParams.append('email', formData.email);
+            netlifyParams.append('phone', formData.phone);
+            netlifyParams.append('program', formData.program);
+            netlifyParams.append('message', formData.message);
+            netlifyParams.append('serviceType', 'lpk');
+            netlifyParams.append('serviceName', 'LPK Buwas Ikigai Nusantara');
+
+            const nfRes = await fetch('/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: netlifyParams.toString()
+            });
+            if (nfRes.ok) isSuccess = true;
+          } catch (nfErr) {
+            console.warn('[LPK Form] Netlify Forms fallback:', nfErr.message);
+          }
+        }
+
+        // 4. Save local backup
+        try {
+          const backupList = JSON.parse(localStorage.getItem('bin_submissions_backup') || '[]');
+          backupList.unshift({ ...formData, submittedAt: new Date().toISOString() });
+          localStorage.setItem('bin_submissions_backup', JSON.stringify(backupList.slice(0, 50)));
+        } catch (e) {}
+
+        if (isSuccess) {
           // Show success message
           if (formSuccess) formSuccess.classList.add('show');
           contactForm.reset();
+          contactForm.querySelectorAll('.form-control').forEach(f => f.classList.remove('error'));
 
-          // Hide success message after 5 seconds
           setTimeout(() => {
             if (formSuccess) formSuccess.classList.remove('show');
           }, 5000);
-        } catch (err) {
-          console.error(err);
-          alert('Gagal mengirim pesan. Silakan coba kembali beberapa saat lagi.');
-        } finally {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = origBtnHtml;
-            if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+        } else {
+          // Fallback WhatsApp option
+          const waText = encodeURIComponent(`Halo LPK Buwas Ikigai Nusantara, saya ${formData.name} ingin mendaftar program ${formData.program}:\n\n${formData.message}\n(No HP: ${formData.phone})`);
+          const confirmWA = confirm('Server sedang dalam pemeliharaan. Ingin meneruskan pendaftaran langsung ke WhatsApp resmi LPK?');
+          if (confirmWA) {
+            window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
+            contactForm.reset();
+          } else {
+            alert('Pesan pendaftaran Anda telah disimpan secara offline dan akan segera kami hubungi.');
           }
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origBtnHtml;
+          if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
         }
       }
     });

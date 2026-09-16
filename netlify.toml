@@ -1,3 +1,75 @@
 [build]
   command = "npm run build"
   publish = "."
+
+[functions]
+  directory = "netlify/functions"
+
+# Contact Form API Redirects
+[[redirects]]
+  from = "/api/contact/*"
+  to = "/.netlify/functions/contact/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/contact"
+  status = 200
+
+# Per-page and shared gallery static API redirects
+[[redirects]]
+  from = "/api/content/gallery/:page"
+  to = "/data/gallery-:page.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/content/gallery"
+  to = "/data/gallery-lpk.json"
+  status = 200
+
+# Dynamic Content sections, testimonials, faqs
+[[redirects]]
+  from = "/api/content"
+  to = "/data/content.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/content/testimonials"
+  to = "/data/testimonials.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/content/partners"
+  to = "/data/partners.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/content/faq"
+  to = "/data/faq.json"
+  status = 200
+
+# Clean landing page routes
+[[redirects]]
+  from = "/lpk"
+  to = "/lpk.html"
+  status = 200
+
+[[redirects]]
+  from = "/procool"
+  to = "/procool.html"
+  status = 200
+
+[[redirects]]
+  from = "/konsultasi-hukum"
+  to = "/konsultasi-hukum.html"
+  status = 200
+
+[[redirects]]
+  from = "/jasa-geoteknik"
+  to = "/jasa-geoteknik.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200

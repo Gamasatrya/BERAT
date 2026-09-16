@@ -682,7 +682,10 @@
           <!-- Contact Form -->
           <div class="contact-form reveal-left">
             <h3>Kirim Pesan</h3>
-            <form id="contact-form" novalidate>
+            <form id="contact-form" name="lpk-contact" method="POST" data-netlify="true" novalidate>
+              <input type="hidden" name="form-name" value="lpk-contact">
+              <input type="hidden" name="serviceType" value="lpk">
+              <input type="hidden" name="serviceName" value="LPK Buwas Ikigai Nusantara">
               <div class="form-group">
                 <label for="name">Nama Lengkap <span class="required">*</span></label>
                 <input type="text" id="name" name="name" class="form-control" placeholder="Masukkan nama lengkap Anda" required>
@@ -699,13 +702,14 @@
                 <div class="form-error">Nomor telepon wajib diisi</div>
               </div>
               <div class="form-group">
-                <label for="program-select">Program Pelatihan</label>
-                <select id="program-select" name="program" class="form-control">
-                  <option value="">Pilih program pelatihan</option>
+                <label for="program-select">Program Pelatihan <span class="required">*</span></label>
+                <select id="program-select" name="program" class="form-control" required>
+                  <option value="">Pilih program pelatihan...</option>
                   <option value="excavator">Excavator Operator</option>
                   <option value="dump-truck">Dump Truck</option>
                   <option value="mekanik">Mekanik</option>
                 </select>
+                <div class="form-error">Pilihan program wajib dipilih</div>
               </div>
               <div class="form-group">
                 <label for="message">Pesan <span class="required">*</span></label>
@@ -895,6 +899,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="js/firebase-config.js"></script>
   <script src="js/app.js"></script>
   <!-- Firebase Articles (non-blocking, graceful fallback) -->
   <script src="js/firebase-articles.js"></script>

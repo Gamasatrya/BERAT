@@ -301,12 +301,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById(formId);
     if (!form) return;
 
+    // Real-time visual feedback on required fields
+    const formFields = form.querySelectorAll('input, select, textarea');
+    formFields.forEach(field => {
+      field.addEventListener('blur', () => {
+        if (field.hasAttribute('required')) {
+          if (!field.value.trim()) {
+            field.style.borderColor = '#ef4444';
+          } else {
+            field.style.borderColor = '';
+          }
+        }
+      });
+      field.addEventListener('input', () => {
+        if (field.value.trim()) {
+          field.style.borderColor = '';
+        }
+      });
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const nameInput = form.querySelector('input[type="text"]');
-      const emailInput = form.querySelector('input[type="email"]');
-      const phoneInput = form.querySelector('input[type="tel"]');
+      const nameInput = form.querySelector('input[type="text"], input[name="name"]');
+      const emailInput = form.querySelector('input[type="email"], input[name="email"]');
+      const phoneInput = form.querySelector('input[type="tel"], input[name="phone"]');
       const serviceSelect = form.querySelector('select');
       const messageTextarea = form.querySelector('textarea');
       const btn = form.querySelector('button[type="submit"]');
@@ -314,25 +333,59 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = nameInput ? nameInput.value.trim() : '';
       const email = emailInput ? emailInput.value.trim() : '';
       const phone = phoneInput ? phoneInput.value.trim() : '';
-      const program = serviceSelect ? serviceSelect.value : serviceName;
+      const program = serviceSelect ? serviceSelect.value.trim() : serviceName;
       const message = messageTextarea ? messageTextarea.value.trim() : '';
 
-      // Validasi field wajib
+      // ─── VALIDASI SELURUH FIELD MANDATORY ───
       if (!name) {
-        alert('Nama lengkap wajib diisi');
-        if (nameInput) nameInput.focus();
+        alert('Kolom Nama Lengkap wajib diisi.');
+        if (nameInput) { nameInput.style.borderColor = '#ef4444'; nameInput.focus(); }
+        return;
+      }
+      if (name.length < 2) {
+        alert('Nama lengkap minimal 2 karakter.');
+        if (nameInput) { nameInput.style.borderColor = '#ef4444'; nameInput.focus(); }
+        return;
+      }
+
+      if (emailInput && !email) {
+        alert('Kolom Email wajib diisi.');
+        emailInput.style.borderColor = '#ef4444';
+        emailInput.focus();
+        return;
+      }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Format alamat email tidak valid.');
+        if (emailInput) { emailInput.style.borderColor = '#ef4444'; emailInput.focus(); }
         return;
       }
 
       if (!phone) {
-        alert('Nomor telepon / WhatsApp wajib diisi');
-        if (phoneInput) phoneInput.focus();
+        alert('Kolom Nomor Telepon / WhatsApp wajib diisi.');
+        if (phoneInput) { phoneInput.style.borderColor = '#ef4444'; phoneInput.focus(); }
+        return;
+      }
+      if (!/^[\d\s\-\+\(\)]{8,}$/.test(phone)) {
+        alert('Format nomor telepon tidak valid (minimal 8 digit).');
+        if (phoneInput) { phoneInput.style.borderColor = '#ef4444'; phoneInput.focus(); }
         return;
       }
 
-      if (messageTextarea && !message) {
-        alert('Pesan / deskripsi kebutuhan wajib diisi');
-        if (messageTextarea) messageTextarea.focus();
+      if (serviceSelect && (!program || program === '')) {
+        alert('Silakan pilih salah satu opsi layanan / program.');
+        serviceSelect.style.borderColor = '#ef4444';
+        serviceSelect.focus();
+        return;
+      }
+
+      if (!message) {
+        alert('Kolom Pesan / Detail kebutuhan wajib diisi.');
+        if (messageTextarea) { messageTextarea.style.borderColor = '#ef4444'; messageTextarea.focus(); }
+        return;
+      }
+      if (message.length < 3) {
+        alert('Pesan atau detail kebutuhan minimal 3 karakter.');
+        if (messageTextarea) { messageTextarea.style.borderColor = '#ef4444'; messageTextarea.focus(); }
         return;
       }
 
@@ -344,7 +397,9 @@ document.addEventListener('DOMContentLoaded', () => {
         message,
         serviceType,
         serviceName,
-        status: 'new'
+        status: 'new',
+        read: false,
+        submittedAt: new Date().toISOString()
       };
 
       const origBtnText = btn ? btn.innerHTML : '';
@@ -353,6 +408,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
       }
 
+      let isSuccess = false;
+
+      // ─── LAYER 1: Kirim ke /api/contact (Express lokal atau Netlify Function) ───
       try {
         const response = await fetch('/api/contact', {
           method: 'POST',
@@ -361,21 +419,81 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (response.ok) {
-          alert('Pesan Anda berhasil terkirim! Tim kami akan menghubungi Anda segera.');
+          isSuccess = true;
+        }
+      } catch (apiErr) {
+        console.warn('[BIN Contact] /api/contact gagal, mencoba layer fallback Netlify Forms:', apiErr.message);
+      }
+
+      // ─── LAYER 2: Fallback ke Netlify Forms native POST ───
+      if (!isSuccess) {
+        try {
+          const formName = form.getAttribute('name') || formId;
+          const netlifyParams = new URLSearchParams();
+          netlifyParams.append('form-name', formName);
+          netlifyParams.append('name', name);
+          if (email) netlifyParams.append('email', email);
+          netlifyParams.append('phone', phone);
+          netlifyParams.append('program', program);
+          netlifyParams.append('message', message);
+          netlifyParams.append('serviceType', serviceType);
+          netlifyParams.append('serviceName', serviceName);
+
+          const netlifyRes = await fetch('/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: netlifyParams.toString()
+          });
+
+          if (netlifyRes.ok) {
+            isSuccess = true;
+          }
+        } catch (nfErr) {
+          console.warn('[BIN Contact] Netlify Forms fallback error:', nfErr.message);
+        }
+      }
+
+      // ─── LAYER 3: Sinkronisasi Firestore (jika tersedia) ───
+      try {
+        if (!window._firebaseDb && typeof window.initFirebase === 'function') {
+          await window.initFirebase();
+        }
+        if (window._firebaseDb) {
+          await window._firebaseDb.collection('contact_submissions').add(submitData);
+          isSuccess = true;
+        }
+      } catch (fbErr) {
+        console.warn('[BIN Contact] Firestore sync skipped:', fbErr.message);
+      }
+
+      // ─── LAYER 4: Simpan Cadangan Lokal di Browser ───
+      try {
+        const backupList = JSON.parse(localStorage.getItem('bin_submissions_backup') || '[]');
+        backupList.unshift(submitData);
+        localStorage.setItem('bin_submissions_backup', JSON.stringify(backupList.slice(0, 50)));
+      } catch (e) {}
+
+      // ─── FINAL FEEDBACK TO USER ───
+      if (isSuccess) {
+        alert('Pesan Anda berhasil terkirim! Tim ' + serviceName + ' akan menghubungi Anda segera.');
+        form.reset();
+        formFields.forEach(f => f.style.borderColor = '');
+      } else {
+        // Jika seluruh jalur online offline/gagal, beri opsi direct WhatsApp
+        const waText = encodeURIComponent(`Halo ${serviceName}, saya ${name} ingin menanyakan:\n\n${message}\n(No HP: ${phone})`);
+        const confirmWA = confirm('Server sedang dalam pemeliharaan. Ingin meneruskan pesan ini langsung ke WhatsApp resmi kami?');
+        if (confirmWA) {
+          window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
           form.reset();
         } else {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.message || 'Gagal mengirim pesan');
+          alert('Pesan Anda telah disimpan secara offline di browser ini dan akan kami proses segera.');
         }
-      } catch (err) {
-        alert('Gagal mengirim pesan: ' + err.message + '. Silakan periksa kembali data Anda dan coba lagi.');
-        // Form TIDAK di-reset saat gagal
-      } finally {
-        if (btn) {
-          btn.innerHTML = origBtnText;
-          btn.disabled = false;
-          initIcons();
-        }
+      }
+
+      if (btn) {
+        btn.innerHTML = origBtnText;
+        btn.disabled = false;
+        initIcons();
       }
     });
   };
