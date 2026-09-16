@@ -403,101 +403,122 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const origBtnText = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Mengirim...`;
-        btn.disabled = true;
-      }
 
-      let isSuccess = false;
-
-      // ─── LAYER 1: Kirim ke /api/contact (Express lokal atau Netlify Function) ───
       try {
-        const response = await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(submitData)
-        });
-
-        if (response.ok) {
-          isSuccess = true;
+        if (btn) {
+          btn.innerHTML = `<i data-lucide="loader" class="spin"></i> Mengirim...`;
+          btn.disabled = true;
+          initIcons();
         }
-      } catch (apiErr) {
-        console.warn('[BIN Contact] /api/contact gagal, mencoba layer fallback Netlify Forms:', apiErr.message);
-      }
 
-      // ─── LAYER 2: Fallback ke Netlify Forms native POST ───
-      if (!isSuccess) {
+        let isSuccess = false;
+
+        // ─── LAYER 1: Kirim ke /api/contact (Express lokal atau Netlify Function) ───
         try {
-          const formName = form.getAttribute('name') || formId;
-          const netlifyParams = new URLSearchParams();
-          netlifyParams.append('form-name', formName);
-          netlifyParams.append('name', name);
-          if (email) netlifyParams.append('email', email);
-          netlifyParams.append('phone', phone);
-          netlifyParams.append('program', program);
-          netlifyParams.append('message', message);
-          netlifyParams.append('serviceType', serviceType);
-          netlifyParams.append('serviceName', serviceName);
-
-          const netlifyRes = await fetch('/', {
+          const response = await fetch('/api/contact', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: netlifyParams.toString()
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(submitData)
           });
 
-          if (netlifyRes.ok) {
+          if (response.ok) {
             isSuccess = true;
           }
-        } catch (nfErr) {
-          console.warn('[BIN Contact] Netlify Forms fallback error:', nfErr.message);
+        } catch (apiErr) {
+          console.warn('[BIN Contact] /api/contact gagal, mencoba layer fallback Netlify Forms:', apiErr.message);
         }
-      }
 
-      // ─── LAYER 3: Sinkronisasi Firestore (jika tersedia) ───
-      try {
-        if (!window._firebaseDb && typeof window.initFirebase === 'function') {
-          await window.initFirebase();
+        // ─── LAYER 2: Fallback ke Netlify Forms native POST ───
+        if (!isSuccess) {
+          try {
+            const formName = form.getAttribute('name') || formId;
+            const netlifyParams = new URLSearchParams();
+            netlifyParams.append('form-name', formName);
+            netlifyParams.append('name', name);
+            if (email) netlifyParams.append('email', email);
+            netlifyParams.append('phone', phone);
+            netlifyParams.append('program', program);
+            netlifyParams.append('message', message);
+            netlifyParams.append('serviceType', serviceType);
+            netlifyParams.append('serviceName', serviceName);
+
+            const netlifyRes = await fetch('/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: netlifyParams.toString()
+            });
+
+            if (netlifyRes.ok) {
+              isSuccess = true;
+            }
+          } catch (nfErr) {
+            console.warn('[BIN Contact] Netlify Forms fallback error:', nfErr.message);
+          }
         }
-        if (window._firebaseDb) {
-          await window._firebaseDb.collection('contact_submissions').add(submitData);
-          isSuccess = true;
+
+        // ─── LAYER 3: Sinkronisasi Firestore di background (Non-blocking / fire-and-forget) ───
+        try {
+          if (window._firebaseDb) {
+            window._firebaseDb.collection('contact_submissions').add(submitData).catch(fbErr => {
+              console.warn('[BIN Contact] Firestore sync skipped:', fbErr.message);
+            });
+          }
+        } catch (fbErr) {
+          console.warn('[BIN Contact] Firestore sync skipped:', fbErr.message);
         }
-      } catch (fbErr) {
-        console.warn('[BIN Contact] Firestore sync skipped:', fbErr.message);
-      }
 
-      // ─── LAYER 4: Simpan Cadangan Lokal di Browser ───
-      try {
-        const backupList = JSON.parse(localStorage.getItem('bin_submissions_backup') || '[]');
-        backupList.unshift(submitData);
-        localStorage.setItem('bin_submissions_backup', JSON.stringify(backupList.slice(0, 50)));
-      } catch (e) {}
+        // ─── LAYER 4: Simpan Cadangan Lokal di Browser ───
+        try {
+          const backupList = JSON.parse(localStorage.getItem('bin_submissions_backup') || '[]');
+          backupList.unshift(submitData);
+          localStorage.setItem('bin_submissions_backup', JSON.stringify(backupList.slice(0, 50)));
+        } catch (e) {}
 
-      // ─── FINAL FEEDBACK TO USER ───
-      if (isSuccess) {
-        alert('Pesan Anda berhasil terkirim! Tim ' + serviceName + ' akan menghubungi Anda segera.');
-        form.reset();
-        formFields.forEach(f => f.style.borderColor = '');
-      } else {
-        // Jika seluruh jalur online offline/gagal, beri opsi direct WhatsApp
-        const waText = encodeURIComponent(`Halo ${serviceName}, saya ${name} ingin menanyakan:\n\n${message}\n(No HP: ${phone})`);
-        const confirmWA = confirm('Server sedang dalam pemeliharaan. Ingin meneruskan pesan ini langsung ke WhatsApp resmi kami?');
-        if (confirmWA) {
-          window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
+        // ─── FINAL FEEDBACK TO USER ───
+        if (isSuccess) {
+          let successEl = form.querySelector('.form-success');
+          if (!successEl) {
+            successEl = document.createElement('div');
+            successEl.className = 'form-success';
+            successEl.style.marginTop = '1rem';
+            form.appendChild(successEl);
+          }
+          successEl.innerHTML = `<i data-lucide="check-circle" style="width:20px;height:20px;display:inline-block;vertical-align:middle;margin-right:6px;"></i> Pesan Anda berhasil terkirim! Tim ${serviceName} akan menghubungi Anda segera.`;
+          successEl.classList.add('show');
+          initIcons();
+
+          alert('Pesan Anda berhasil terkirim! Tim ' + serviceName + ' akan menghubungi Anda segera.');
           form.reset();
-        } else {
-          alert('Pesan Anda telah disimpan secara offline di browser ini dan akan kami proses segera.');
-        }
-      }
+          formFields.forEach(f => f.style.borderColor = '');
 
-      if (btn) {
-        btn.innerHTML = origBtnText;
-        btn.disabled = false;
-        initIcons();
+          setTimeout(() => {
+            if (successEl) successEl.classList.remove('show');
+          }, 6000);
+        } else {
+          // Jika seluruh jalur online offline/gagal, beri opsi direct WhatsApp
+          const waText = encodeURIComponent(`Halo ${serviceName}, saya ${name} ingin menanyakan:\n\n${message}\n(No HP: ${phone})`);
+          const confirmWA = confirm('Server sedang dalam pemeliharaan. Ingin meneruskan pesan ini langsung ke WhatsApp resmi kami?');
+          if (confirmWA) {
+            window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
+            form.reset();
+          } else {
+            alert('Pesan Anda telah disimpan secara offline di browser ini dan akan kami proses segera.');
+          }
+        }
+      } catch (err) {
+        console.error('[BIN Contact] Unexpected submit error:', err);
+        alert('Terjadi kesalahan saat memproses formulir. Silakan coba beberapa saat lagi.');
+      } finally {
+        if (btn) {
+          btn.innerHTML = origBtnText;
+          btn.disabled = false;
+          initIcons();
+        }
       }
     });
   };
 
+  setupFormSubmission('contact-form', 'lpk', 'LPK Buwas Ikigai Nusantara');
   setupFormSubmission('bin-contact-form', 'lpk', 'LPK Buwas Ikigai Nusantara');
   setupFormSubmission('procool-contact-form', 'procool', 'Procool');
   setupFormSubmission('legal-contact-form', 'legal', 'Konsultasi Hukum');

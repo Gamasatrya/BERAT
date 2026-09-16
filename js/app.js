@@ -643,64 +643,70 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!validateField(field)) allValid = false;
       });
 
-      if (allValid) {
-        const submitBtn = contactForm.querySelector('button[type="submit"]');
-        const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (!allValid) {
+        const firstError = contactForm.querySelector('.form-control.error');
+        if (firstError) firstError.focus();
+        return;
+      }
+
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+      try {
         if (submitBtn) {
           submitBtn.disabled = true;
           submitBtn.innerHTML = `<i data-lucide="loader" class="spin"></i> Mengirim...`;
+          if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+        }
+
+        const nameInput = contactForm.querySelector('#name') || document.getElementById('name');
+        const emailInput = contactForm.querySelector('#email') || document.getElementById('email');
+        const phoneInput = contactForm.querySelector('#phone') || document.getElementById('phone');
+        const programSelect = contactForm.querySelector('#program-select') || document.getElementById('program-select');
+        const messageInput = contactForm.querySelector('#message') || document.getElementById('message');
+
+        let selectedProgramText = '-';
+        if (programSelect && programSelect.selectedIndex >= 0 && programSelect.value) {
+          selectedProgramText = programSelect.options[programSelect.selectedIndex]?.text || programSelect.value;
         }
 
         // Collect form data
         const formData = {
-          name: document.getElementById('name').value,
-          email: document.getElementById('email').value,
-          phone: document.getElementById('phone').value,
-          program: document.getElementById('program-select') ? document.getElementById('program-select').value : '-',
-          message: document.getElementById('message').value,
+          name: nameInput ? nameInput.value.trim() : '',
+          email: emailInput ? emailInput.value.trim() : '',
+          phone: phoneInput ? phoneInput.value.trim() : '',
+          program: selectedProgramText,
+          message: messageInput ? messageInput.value.trim() : '',
           serviceType: 'lpk',
           serviceName: 'LPK Buwas Ikigai Nusantara',
-          status: 'new'
+          status: 'new',
+          read: false,
+          submittedAt: new Date().toISOString()
         };
 
         let isSuccess = false;
 
-        // 1. Try Firebase Firestore
+        // ─── LAYER 1: Kirim ke /api/contact (Express lokal atau Netlify Function) ───
         try {
-          if (!window._firebaseDb && window.initFirebase) {
-            await window.initFirebase();
-          }
-          if (window._firebaseDb) {
-            formData.createdAt = new Date().toISOString();
-            formData.read = false;
-            await window._firebaseDb.collection('contact_submissions').add(formData);
+          const apiRes = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+          if (apiRes.ok) {
             isSuccess = true;
           }
-        } catch (fbErr) {
-          console.warn('[LPK Form] Firebase save fallback:', fbErr.message);
+        } catch (apiErr) {
+          console.warn('[LPK Form] /api/contact gagal, mencoba layer fallback Netlify Forms:', apiErr.message);
         }
 
-        // 2. Try /api/contact (Netlify function or Express)
-        if (!isSuccess) {
-          try {
-            const apiRes = await fetch('/api/contact', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(formData)
-            });
-            if (apiRes.ok) isSuccess = true;
-          } catch (apiErr) {
-            console.warn('[LPK Form] /api/contact fallback:', apiErr.message);
-          }
-        }
-
-        // 3. Try Netlify Forms native POST
+        // ─── LAYER 2: Fallback ke Netlify Forms native POST jika /api/contact gagal ───
         if (!isSuccess) {
           try {
             const netlifyParams = new URLSearchParams();
             netlifyParams.append('form-name', contactForm.getAttribute('name') || 'lpk-contact');
             netlifyParams.append('name', formData.name);
-            netlifyParams.append('email', formData.email);
+            if (formData.email) netlifyParams.append('email', formData.email);
             netlifyParams.append('phone', formData.phone);
             netlifyParams.append('program', formData.program);
             netlifyParams.append('message', formData.message);
@@ -714,38 +720,57 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (nfRes.ok) isSuccess = true;
           } catch (nfErr) {
-            console.warn('[LPK Form] Netlify Forms fallback:', nfErr.message);
+            console.warn('[LPK Form] Netlify Forms fallback error:', nfErr.message);
           }
         }
 
-        // 4. Save local backup
+        // ─── LAYER 3: Sinkronisasi Firestore di background (Non-blocking / fire-and-forget) ───
+        try {
+          if (window._firebaseDb) {
+            window._firebaseDb.collection('contact_submissions').add(formData).catch(fbErr => {
+              console.warn('[LPK Form] Firestore sync skipped:', fbErr.message);
+            });
+          }
+        } catch (fbErr) {
+          console.warn('[LPK Form] Firestore sync skipped:', fbErr.message);
+        }
+
+        // ─── LAYER 4: Simpan cadangan lokal di browser ───
         try {
           const backupList = JSON.parse(localStorage.getItem('bin_submissions_backup') || '[]');
           backupList.unshift({ ...formData, submittedAt: new Date().toISOString() });
           localStorage.setItem('bin_submissions_backup', JSON.stringify(backupList.slice(0, 50)));
         } catch (e) {}
 
+        // ─── FEEDBACK KE PENGGUNA ───
         if (isSuccess) {
-          // Show success message
+          // Tampilkan pesan sukses di halaman
           if (formSuccess) formSuccess.classList.add('show');
+
           contactForm.reset();
           contactForm.querySelectorAll('.form-control').forEach(f => f.classList.remove('error'));
 
+          // Notifikasi alert pop-up yang jelas
+          alert('Pesan pendaftaran LPK Anda berhasil terkirim! Tim LPK Buwas Ikigai Nusantara akan segera menghubungi Anda.');
+
           setTimeout(() => {
             if (formSuccess) formSuccess.classList.remove('show');
-          }, 5000);
+          }, 6000);
         } else {
-          // Fallback WhatsApp option
+          // Fallback WhatsApp option jika offline / error
           const waText = encodeURIComponent(`Halo LPK Buwas Ikigai Nusantara, saya ${formData.name} ingin mendaftar program ${formData.program}:\n\n${formData.message}\n(No HP: ${formData.phone})`);
-          const confirmWA = confirm('Server sedang dalam pemeliharaan. Ingin meneruskan pendaftaran langsung ke WhatsApp resmi LPK?');
+          const confirmWA = confirm('Gagal menghubungi server. Ingin meneruskan pendaftaran langsung ke WhatsApp resmi LPK?');
           if (confirmWA) {
             window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
             contactForm.reset();
           } else {
-            alert('Pesan pendaftaran Anda telah disimpan secara offline dan akan segera kami hubungi.');
+            alert('Pesan pendaftaran Anda telah disimpan secara offline di browser ini dan akan segera kami proses.');
           }
         }
-
+      } catch (err) {
+        console.error('[LPK Form] Unexpected submit error:', err);
+        alert('Terjadi kesalahan saat memproses formulir. Silakan coba beberapa saat lagi.');
+      } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = origBtnHtml;
