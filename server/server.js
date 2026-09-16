@@ -45,6 +45,13 @@ app.get('/api/firebase-config', (req, res) => {
   res.json(config);
 });
 
+// Clean explicit page routes
+app.get('/lpk', (req, res) => res.sendFile(path.join(__dirname, '../lpk.html')));
+app.get('/procool', (req, res) => res.sendFile(path.join(__dirname, '../procool.html')));
+app.get('/konsultasi-hukum', (req, res) => res.sendFile(path.join(__dirname, '../konsultasi-hukum.html')));
+app.get('/jasa-geoteknik', (req, res) => res.sendFile(path.join(__dirname, '../jasa-geoteknik.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../admin.html')));
+
 // Serve public static files (from the project root)
 app.use(express.static(path.join(__dirname, '../')));
 

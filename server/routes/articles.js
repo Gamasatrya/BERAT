@@ -1,8 +1,8 @@
 /**
  * Articles API Routes
- * Menggunakan Cloud Firestore untuk menyimpan data artikel.
+ * Menggunakan Cloud Firestore untuk menyimpan data artikel dengan Fallback ke Local JSON (data/articles.json).
  * 
- * Collection: articles
+ * Collection / File: articles
  * Fields: id, title, slug, content, excerpt, imageUrl, createdAt, updatedAt, status
  * 
  * Routes:
@@ -16,29 +16,71 @@
 
 const express        = require('express');
 const router         = express.Router();
+const fs             = require('fs');
+const path           = require('path');
 const authMiddleware = require('../middleware/auth');
 
-// Lazy-load Firebase Admin untuk menghindari error saat FIREBASE_PROJECT_ID belum diisi
-let _db = null;
-function getDb() {
-  if (_db) return _db;
+const dataDir = path.join(__dirname, '../../data');
+const articlesJsonPath = path.join(dataDir, 'articles.json');
+
+// ─── Local JSON Storage Helpers ──────────────────────────────────────────────
+
+function readLocalArticles() {
+  if (!fs.existsSync(articlesJsonPath)) {
+    const initialArticles = [
+      {
+        id: 'art-1',
+        title: 'Mengenal Sertifikasi BNSP Operator Alat Berat',
+        slug: 'mengenal-sertifikasi-bnsp-operator-alat-berat',
+        excerpt: 'Pentingnya sertifikasi resmi BNSP untuk karir profesional operator excavator, bulldozer, dan loader.',
+        content: '<p>Sertifikasi BNSP (Badan Nasional Sertifikasi Profesi) merupakan bukti kompetensi resmi yang diakui secara nasional maupun internasional bagi operator alat berat.</p><p>Di LPK Buwas Ikigai Nusantara, peserta diberikan pelatihan teori keselamatan kerja, perawatan unit, serta praktek lapangan secara intensif hingga lulus uji kompetensi.</p>',
+        imageUrl: '/assets/images/heavy-equipment.png',
+        status: 'published',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'art-2',
+        title: 'Panduan Perawatan Sistem HVAC & AC Komersial',
+        slug: 'panduan-perawatan-sistem-hvac-ac-komersial',
+        excerpt: 'Tips menjaga efisiensi dan daya tahan sistem pendingin gedung serta industri bersama Procool.',
+        content: '<p>Sistem HVAC yang terawat dengan baik dapat menghemat konsumsi energi hingga 30% dan mencegah kerusakan mendadak pada unit chiller dan AHU.</p><p>Procool memberikan layanan pemeliharaan berkala dan perbaikan cepat oleh teknisi tersertifikasi.</p>',
+        imageUrl: '/assets/images/procool-bg.jpg',
+        status: 'published',
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        updatedAt: new Date(Date.now() - 86400000).toISOString()
+      }
+    ];
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    fs.writeFileSync(articlesJsonPath, JSON.stringify(initialArticles, null, 2));
+    return initialArticles;
+  }
   try {
-    const { getDb: initDb } = require('../firebase-admin');
-    _db = initDb();
-    return _db;
+    return JSON.parse(fs.readFileSync(articlesJsonPath, 'utf8'));
   } catch (err) {
-    throw new Error(
-      'Firebase belum dikonfigurasi. Pastikan FIREBASE_PROJECT_ID dan FIREBASE_SERVICE_ACCOUNT ' +
-      'sudah diisi di file .env. Detail: ' + err.message
-    );
+    return [];
   }
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+function writeLocalArticles(articles) {
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  fs.writeFileSync(articlesJsonPath, JSON.stringify(articles, null, 2));
+}
 
-/**
- * Buat slug dari judul artikel
- */
+// ─── Firestore Helpers ────────────────────────────────────────────────────────
+
+let _db = null;
+function getDb() {
+  if (_db) return _db;
+  const { getDb: initDb } = require('../firebase-admin');
+  _db = initDb();
+  return _db;
+}
+
 function createSlug(title) {
   return title
     .toLowerCase()
@@ -48,9 +90,6 @@ function createSlug(title) {
     .replace(/^-+|-+$/g, '');
 }
 
-/**
- * Konversi Firestore document ke plain object
- */
 function docToArticle(doc) {
   const data = doc.data();
   return {
@@ -61,8 +100,8 @@ function docToArticle(doc) {
     excerpt:   data.excerpt   || '',
     imageUrl:  data.imageUrl  || '',
     status:    data.status    || 'draft',
-    createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-    updatedAt: data.updatedAt ? data.updatedAt.toDate().toISOString() : new Date().toISOString()
+    createdAt: data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : data.createdAt) : new Date().toISOString(),
+    updatedAt: data.updatedAt ? (typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : data.updatedAt) : new Date().toISOString()
   };
 }
 
@@ -70,8 +109,7 @@ function docToArticle(doc) {
 
 /**
  * GET /api/articles
- * Mengambil semua artikel dengan status "published" (public)
- * Diurutkan berdasarkan createdAt terbaru.
+ * Artikel status "published" (public)
  */
 router.get('/', async (req, res) => {
   try {
@@ -82,21 +120,20 @@ router.get('/', async (req, res) => {
       .get();
 
     const articles = snapshot.docs.map(docToArticle);
-    res.json(articles);
+    return res.json(articles);
   } catch (err) {
-    console.error('[Articles] GET / error:', err);
-    // Jika Firebase belum dikonfigurasi, kembalikan array kosong
-    // agar halaman publik tidak rusak
-    if (err.message.includes('Firebase belum dikonfigurasi')) {
-      return res.json([]);
-    }
-    res.status(500).json({ message: 'Gagal mengambil artikel', error: err.message });
+    console.warn('[Articles] Firestore query fallback to local JSON:', err.message);
+    const local = readLocalArticles();
+    const published = local
+      .filter(a => a.status === 'published')
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return res.json(published);
   }
 });
 
 /**
  * GET /api/articles/all
- * Mengambil SEMUA artikel termasuk draft (protected, admin only)
+ * Semua artikel incl. draft (protected)
  */
 router.get('/all', authMiddleware, async (req, res) => {
   try {
@@ -106,16 +143,18 @@ router.get('/all', authMiddleware, async (req, res) => {
       .get();
 
     const articles = snapshot.docs.map(docToArticle);
-    res.json(articles);
+    return res.json(articles);
   } catch (err) {
-    console.error('[Articles] GET /all error:', err);
-    res.status(500).json({ message: 'Gagal mengambil semua artikel', error: err.message });
+    console.warn('[Articles] Firestore query fallback to local JSON:', err.message);
+    const local = readLocalArticles();
+    local.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return res.json(local);
   }
 });
 
 /**
  * GET /api/articles/:id
- * Detail artikel berdasarkan ID (public)
+ * Detail artikel (public)
  */
 router.get('/:id', async (req, res) => {
   try {
@@ -126,18 +165,21 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Artikel tidak ditemukan' });
     }
 
-    res.json(docToArticle(doc));
+    return res.json(docToArticle(doc));
   } catch (err) {
-    console.error('[Articles] GET /:id error:', err);
-    res.status(500).json({ message: 'Gagal mengambil artikel', error: err.message });
+    console.warn('[Articles] Firestore query fallback to local JSON:', err.message);
+    const local = readLocalArticles();
+    const article = local.find(a => a.id === req.params.id);
+    if (!article) {
+      return res.status(404).json({ message: 'Artikel tidak ditemukan' });
+    }
+    return res.json(article);
   }
 });
 
 /**
  * POST /api/articles
  * Tambah artikel baru (protected)
- * 
- * Body: { title, content, excerpt, imageUrl, status }
  */
 router.post('/', authMiddleware, async (req, res) => {
   const { title, content, excerpt, imageUrl, status } = req.body;
@@ -146,10 +188,11 @@ router.post('/', authMiddleware, async (req, res) => {
     return res.status(400).json({ message: 'Judul dan konten artikel wajib diisi' });
   }
 
+  const now  = new Date();
+  const slug = createSlug(title);
+
   try {
     const db        = getDb();
-    const now       = new Date();
-    const slug      = createSlug(title);
     const admin     = require('firebase-admin');
     const Timestamp = admin.firestore.Timestamp;
 
@@ -166,7 +209,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const docRef = await db.collection('articles').add(articleData);
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Artikel berhasil ditambahkan',
       article: {
         id:        docRef.id,
@@ -176,16 +219,32 @@ router.post('/', authMiddleware, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('[Articles] POST / error:', err);
-    res.status(500).json({ message: 'Gagal menambahkan artikel', error: err.message });
+    console.warn('[Articles] Firestore POST fallback to local JSON:', err.message);
+    const local = readLocalArticles();
+    const newArticle = {
+      id:        'art-' + Date.now(),
+      title:     title.trim(),
+      slug,
+      content:   content.trim(),
+      excerpt:   (excerpt || '').trim(),
+      imageUrl:  imageUrl || '',
+      status:    status || 'draft',
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
+    };
+    local.unshift(newArticle);
+    writeLocalArticles(local);
+
+    return res.status(201).json({
+      message: 'Artikel berhasil ditambahkan',
+      article: newArticle
+    });
   }
 });
 
 /**
  * PUT /api/articles/:id
- * Edit artikel yang sudah ada (protected)
- * 
- * Body: { title, content, excerpt, imageUrl, status }
+ * Edit artikel (protected)
  */
 router.put('/:id', authMiddleware, async (req, res) => {
   const { title, content, excerpt, imageUrl, status } = req.body;
@@ -218,13 +277,35 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
     await ref.update(updates);
 
-    res.json({
+    return res.json({
       message: 'Artikel berhasil diperbarui',
       article: { id: req.params.id, ...updates, updatedAt: new Date().toISOString() }
     });
   } catch (err) {
-    console.error('[Articles] PUT /:id error:', err);
-    res.status(500).json({ message: 'Gagal memperbarui artikel', error: err.message });
+    console.warn('[Articles] Firestore PUT fallback to local JSON:', err.message);
+    const local = readLocalArticles();
+    const index = local.findIndex(a => a.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Artikel tidak ditemukan' });
+    }
+
+    const updatedArticle = {
+      ...local[index],
+      title:     title.trim(),
+      slug:      createSlug(title),
+      content:   content.trim(),
+      excerpt:   (excerpt || '').trim(),
+      imageUrl:  imageUrl !== undefined ? imageUrl : local[index].imageUrl,
+      status:    status || local[index].status,
+      updatedAt: new Date().toISOString()
+    };
+    local[index] = updatedArticle;
+    writeLocalArticles(local);
+
+    return res.json({
+      message: 'Artikel berhasil diperbarui',
+      article: updatedArticle
+    });
   }
 });
 
@@ -244,11 +325,21 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
     await ref.delete();
 
-    res.json({ message: 'Artikel berhasil dihapus', id: req.params.id });
+    return res.json({ message: 'Artikel berhasil dihapus', id: req.params.id });
   } catch (err) {
-    console.error('[Articles] DELETE /:id error:', err);
-    res.status(500).json({ message: 'Gagal menghapus artikel', error: err.message });
+    console.warn('[Articles] Firestore DELETE fallback to local JSON:', err.message);
+    const local = readLocalArticles();
+    const index = local.findIndex(a => a.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Artikel tidak ditemukan' });
+    }
+
+    local.splice(index, 1);
+    writeLocalArticles(local);
+
+    return res.json({ message: 'Artikel berhasil dihapus', id: req.params.id });
   }
 });
 
 module.exports = router;
+

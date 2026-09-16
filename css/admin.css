@@ -506,29 +506,117 @@ button, input, textarea, select {
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--border-dark, #334155);
+  background-color: var(--bg-dark-800, #0f172a);
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
-.table th,
-.table td {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--border-dark);
-  font-size: 0.875rem;
+.table th {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #1e293b;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap;
 }
 
-.table th {
-  color: var(--text-white);
-  font-weight: 600;
-  background-color: var(--bg-dark-700);
+.table td {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  font-size: 0.875rem;
+  color: #f1f5f9;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
 }
 
 .table tr:hover td {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Service Badge Styling */
+.badge-service {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.badge-service-lpk {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.badge-service-procool {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.badge-service-legal {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.badge-service-geoteknik {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Status Badge Styling */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-status-new {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.badge-status-read {
+  background: rgba(100, 116, 139, 0.18);
+  color: #cbd5e1;
+  border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+.badge-status-in_progress {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-status-completed {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
 /* ============================================
@@ -642,6 +730,16 @@ textarea.form-control {
 .btn-outline-success:hover {
   background-color: var(--accent-green);
   color: var(--text-white);
+}
+
+.btn-outline-info {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background-color: transparent;
+}
+.btn-outline-info:hover {
+  background-color: #38bdf8;
+  color: var(--bg-dark-900);
 }
 
 .btn-danger {

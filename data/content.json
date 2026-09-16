@@ -4,31 +4,106 @@
     "title": "Menjadi Pusat Pelatihan Pengoperasian Alat Berat Terpercaya di Indonesia",
     "subtitle": "Menyediakan pelatihan operator alat berat yang profesional, berstandar nasional, serta didukung instruktur berpengalaman untuk mencetak tenaga kerja yang kompeten, aman, dan siap kerja.",
     "btnPrimary": "Lihat Program",
-    "btnOutline": "Hubungi Kami"
+    "btnOutline": "Hubungi Kami",
+    "bg_image": "assets/images/hero-bg.png"
   },
   "about": {
-    "label": "Tentang Kami",
-    "title": "Membangun SDM Industri yang Kompeten & Profesional",
-    "desc1": "LPK Buwas Ikigai Nusantara merupakan lembaga pelatihan profesional yang berfokus pada peningkatan kompetensi operator alat berat di berbagai sektor industri seperti pertambangan, konstruksi, perkebunan, kehutanan, hingga migas.",
-    "desc2": "Kami menghadirkan program pelatihan berbasis praktik lapangan, simulasi operasional, dan standar keselamatan kerja (K3), sehingga setiap peserta memiliki kemampuan teknis maupun pemahaman keselamatan kerja sesuai kebutuhan industri.",
-    "desc3": "Dengan didukung instruktur berpengalaman dan fasilitas pelatihan yang lengkap, kami berkomitmen mencetak operator alat berat yang kompeten, produktif, dan siap bersaing di dunia kerja.",
-    "experience": "20+"
+    "title": "LPK Buwas Ikigai Nusantara",
+    "experience": "15+",
+    "desc1": "LPK Buwas Ikigai Nusantara merupakan lembaga pelatihan terdepan dalam pengembangan SDM dan operator alat berat.",
+    "desc2": "Dengan komitmen terhadap profesionalisme, kualitas layanan, dan kepuasan pelanggan, kami hadir untuk mencetak tenaga kerja siap pakai.",
+    "desc3": "Melalui pengalaman dan instruktur bersertifikat, kami berupaya menjadi mitra terpercaya industri.",
+    "image": "assets/images/about-training.png"
   },
   "visi_misi": {
-    "visi": "Menjadi lembaga pelatihan alat berat terbaik di Indonesia yang menghasilkan tenaga kerja profesional, kompeten, dan berintegritas.",
+    "visi": "LPK Buwas Ikigai Nusantara adalah lembaga pelatihan kerja yang membekali peserta dengan keterampilan dan kompetensi sesuai kebutuhan industri agar siap kerja.",
     "misi": [
-      "Menyelenggarakan pelatihan berkualitas tinggi.",
-      "Mengutamakan keselamatan kerja (Safety First).",
-      "Mengembangkan kompetensi SDM industri.",
-      "Menyediakan instruktur bersertifikasi.",
-      "Menjalin kemitraan dengan perusahaan nasional maupun internasional."
+      "Menyediakan pelatihan berstandar tinggi",
+      "Mencetak tenaga kerja kompeten dan tersertifikasi",
+      "Membangun jejaring kerja dengan industri nasional"
     ]
   },
   "contact_info": {
     "address": "Jl. Raya Industri No. 88, Bekasi, Jawa Barat",
     "phone": "+62 812-3456-7890",
-    "email": "info@heti.co.id",
-    "hours": "Senin – Jumat\n08.00 – 17.00 WIB",
+    "email": "info@buwasikigainusantara.co.id",
+    "hours": "Senin – Jumat 08.00 – 17.00 WIB",
     "whatsapp": "6281234567890"
+  },
+  "bin": {
+    "hero": {
+      "badge": "BUWAS IKIGAI NUSANTARA",
+      "title": "Core Specialist Services for <span class=\"highlight\">Professional Solutions</span>",
+      "subtitle": "Buwas Ikigai Nusantara (BIN) merupakan grup usaha terkemuka yang menaungi unit layanan profesional lintas sektor: Pengembangan SDM & Sertifikasi, Solusi Tata Udara HVAC, Konsultasi Hukum & Legalitas Usaha, serta Investigasi Geoteknik.",
+      "btnPrimary": "Explore Our Services",
+      "btnOutline": "Hubungi Kami",
+      "bg_image": "assets/images/hero-bg.png"
+    },
+    "about": {
+      "title": "Tentang Buwas Ikigai Nusantara",
+      "desc1": "Buwas Ikigai Nusantara merupakan grup usaha yang bergerak di berbagai sektor layanan profesional yang saling melengkapi, mulai dari pengembangan sumber daya manusia, solusi tata udara dan pendingin, konsultasi hukum, hingga layanan investigasi dan analisis geoteknik.",
+      "desc2": "Dengan komitmen terhadap profesionalisme, kualitas layanan, inovasi, dan kepuasan pelanggan, setiap unit usaha hadir untuk memberikan solusi sesuai kebutuhan klien, baik individu, perusahaan, maupun institusi.",
+      "image": "assets/images/about-training.png"
+    },
+    "contact_info": {
+      "address": "Jl. Raya Industri No. 88, Bekasi, Jawa Barat",
+      "phone": "+62 812-3456-7890",
+      "email": "info@buwasikigainusantara.co.id",
+      "hours": "Senin – Jumat: 08.00 – 17.00 WIB"
+    }
+  },
+  "procool": {
+    "hero": {
+      "title": "Solusi Tata Udara & <span style=\"color: #60A5FA;\">Sistem Pendingin</span> Profesional",
+      "subtitle": "Menyediakan layanan instalasi, perawatan berkala, perbaikan, dan perawatan sistem HVAC/AC komprehensif untuk rumah tinggal, perkantoran, hingga fasilitas industri.",
+      "bg_image": "assets/images/procool-bg.jpg"
+    },
+    "about": {
+      "title": "Layanan Tata Udara Terpercaya",
+      "desc1": "Procool merupakan unit bisnis profesional dari Buwas Ikigai Nusantara yang berfokus pada penyediaan solusi tata udara (HVAC), instalasi sistem pendingin ruangan, serta pemeliharaan teknis.",
+      "desc2": "Didukung oleh tim teknisi bersertifikat dan peralatan ukur modern, Procool menjamin efisiensi energi sistem pendingin dan kualitas udara bersih yang optimal.",
+      "image": "assets/images/procool-bg.jpg"
+    },
+    "contact_info": {
+      "phone": "+62 812-3456-7890 (WhatsApp Available)",
+      "email": "procool@buwasikigainusantara.co.id",
+      "hours": "Senin – Sabtu: 08.00 – 18.00 WIB (24/7 Emergency Response)"
+    }
+  },
+  "legal": {
+    "hero": {
+      "title": "Solusi & Pendampingan <span style=\"color: #C084FC;\">Hukum Terpercaya</span>",
+      "subtitle": "Menyediakan jasa untuk Konsultasi hukum segala macam",
+      "bg_image": "assets/images/legal-bg.jpg"
+    },
+    "about": {
+      "title": "Pendampingan Hukum Berintegritas",
+      "desc1": "Unit Konsultasi Hukum dari Buwas Ikigai Nusantara hadir untuk memberikan proteksi hukum, kepastian legalitas, dan analisis risiko mendalam bagi bisnis maupun individu.",
+      "desc2": "Dengan pemahaman komprehensif terhadap regulasi dan hukum bisnis nasional, tim profesional kami membantu penyusunan kontrak dan legalitas usaha secara konfidensial.",
+      "image": "/uploads/img-1788933520096-891320078.jpg"
+    },
+    "contact_info": {
+      "phone": "+62 812-3456-7890 (Kerahasiaan Terjamin)",
+      "email": "legal@buwasikigainusantara.co.id",
+      "hours": "Senin – Jumat: 08.30 – 17.00 WIB"
+    }
+  },
+  "geoteknik": {
+    "hero": {
+      "title": "Investigasi Tanah & <span style=\"color: #34D399;\">Analisis Geoteknik</span> Presisi",
+      "subtitle": "Menyediakan layanan pengujian sondir CPT, boring machine, sampling lapisan tanah, uji laboratorium mekanika tanah, serta analisa daya dukung pondasi.",
+      "bg_image": "assets/images/geoteknik-bg.jpg"
+    },
+    "about": {
+      "title": "Keamanan Konstruksi Berdasar Data Presisi",
+      "desc1": "Jasa Geoteknik merupakan unit usaha spesialis dari Buwas Ikigai Nusantara yang menyediakan analisis geologi, penyelidikan tanah teknis, dan perencanaan pondasi aman.",
+      "desc2": "Didukung oleh armada rig mesin bor canggih dan lab mekanika tanah berstandar SNI dan ASTM, kami menyajikan data teknis presisi untuk optimasi biaya dan keamanan konstruksi.",
+      "image": "/uploads/img-1788239214917-151047009.jpg"
+    },
+    "contact_info": {
+      "phone": "+62 812-3456-7890 (Project Engineering Available)",
+      "email": "geoteknik@buwasikigainusantara.co.id",
+      "hours": "Senin – Sabtu: 08.00 – 17.00 WIB"
+    }
   }
 }

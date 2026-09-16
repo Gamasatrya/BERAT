@@ -63,12 +63,36 @@
         <a href="#dashboard" class="menu-item active" data-tab="dashboard">
           <i data-lucide="layout-dashboard"></i> Dashboard
         </a>
-        <a href="#content" class="menu-item" data-tab="content">
-          <i data-lucide="edit-3"></i> Kelola Konten
+
+        <div class="sidebar-category" style="font-size:0.685rem; font-weight:700; color:var(--primary); letter-spacing:0.05em; padding: 0.85rem 1rem 0.25rem 1rem;">COMPANY PROFILE</div>
+        <a href="#bin-holding" class="menu-item" data-tab="bin-holding">
+          <i data-lucide="building-2"></i> BIN Holding
         </a>
+
+        <div class="sidebar-category" style="font-size:0.685rem; font-weight:700; color:var(--primary); letter-spacing:0.05em; padding: 0.85rem 1rem 0.25rem 1rem;">UNIT SERVICES</div>
+        <a href="#lpk-content" class="menu-item" data-tab="lpk-content">
+          <i data-lucide="graduation-cap"></i> LPK Buwas Ikigai
+        </a>
+        <a href="#procool-content" class="menu-item" data-tab="procool-content">
+          <i data-lucide="snowflake"></i> Procool (HVAC)
+        </a>
+        <a href="#legal-content" class="menu-item" data-tab="legal-content">
+          <i data-lucide="scale"></i> Konsultasi Hukum
+        </a>
+        <a href="#geoteknik-content" class="menu-item" data-tab="geoteknik-content">
+          <i data-lucide="layers"></i> Jasa Geoteknik
+        </a>
+
+        <div class="sidebar-category" style="font-size:0.685rem; font-weight:700; color:var(--primary); letter-spacing:0.05em; padding: 0.85rem 1rem 0.25rem 1rem;">MEDIA & KONTEN</div>
         <a href="#articles" class="menu-item" data-tab="articles">
-          <i data-lucide="newspaper"></i> Artikel
+          <i data-lucide="newspaper"></i> Artikel & Insight
           <span class="badge badge-unread" id="articles-count" style="display: none;">0</span>
+        </a>
+        <a href="#gallery" class="menu-item" data-tab="gallery">
+          <i data-lucide="images"></i> Galeri & Portofolio
+        </a>
+        <a href="#partners" class="menu-item" data-tab="partners">
+          <i data-lucide="handshake"></i> Mitra & Partner
         </a>
         <a href="#media" class="menu-item" data-tab="media">
           <i data-lucide="image"></i> Media Manager
@@ -78,7 +102,7 @@
           <span class="badge badge-unread" id="unread-count" style="display: none;">0</span>
         </a>
         <a href="#settings" class="menu-item" data-tab="settings">
-          <i data-lucide="settings"></i> Pengaturan
+          <i data-lucide="settings"></i> Pengaturan Global
         </a>
       </nav>
       
@@ -174,24 +198,36 @@
           <!-- Shortcuts -->
           <div class="panel">
             <div class="panel-header">
-              <h3>Pintasan Cepat</h3>
+              <h3>Pintasan Cepat Unit Services</h3>
             </div>
             <div class="shortcuts-grid">
-              <button class="shortcut-card" onclick="switchTab('content')">
-                <i data-lucide="edit-3"></i>
-                <span>Edit Hero Banner</span>
+              <button class="shortcut-card" onclick="switchTab('bin-holding')">
+                <i data-lucide="building-2"></i>
+                <span>BIN Holding</span>
               </button>
-              <button class="shortcut-card" onclick="switchTab('content')">
-                <i data-lucide="users"></i>
-                <span>Kelola Testimoni</span>
+              <button class="shortcut-card" onclick="switchTab('lpk-content')">
+                <i data-lucide="graduation-cap"></i>
+                <span>LPK Buwas Ikigai</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('procool-content')">
+                <i data-lucide="snowflake"></i>
+                <span>Procool (HVAC)</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('legal-content')">
+                <i data-lucide="scale"></i>
+                <span>Konsultasi Hukum</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('geoteknik-content')">
+                <i data-lucide="layers"></i>
+                <span>Jasa Geoteknik</span>
+              </button>
+              <button class="shortcut-card" onclick="switchTab('gallery')">
+                <i data-lucide="images"></i>
+                <span>Kelola Galeri</span>
               </button>
               <button class="shortcut-card" onclick="switchTab('media')">
                 <i data-lucide="upload-cloud"></i>
                 <span>Upload Media</span>
-              </button>
-              <button class="shortcut-card" onclick="switchTab('settings')">
-                <i data-lucide="lock"></i>
-                <span>Ganti Password</span>
               </button>
             </div>
           </div>
@@ -199,9 +235,546 @@
       </section>
 
       <!-- ============================================
-           TAB: CONTENT MANAGER
+           TAB: BIN HOLDING COMPANY PROFILE
            ============================================ -->
-      <section id="tab-content" class="tab-panel" style="display: none;">
+      <section id="tab-bin-holding" class="tab-panel" style="display: none;">
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" data-subtab="bin-hero">Hero Section</button>
+          <button class="sub-tab-btn" data-subtab="bin-about">Tentang BIN</button>
+          <button class="sub-tab-btn" data-subtab="bin-contact">Info Kontak</button>
+          <button class="sub-tab-btn" data-subtab="bin-gallery">🖼️ Galeri Portofolio</button>
+        </div>
+
+        <!-- Subtab Hero BIN -->
+        <div id="subtab-bin-hero" class="subtab-panel">
+          <div class="panel">
+            <h3>Kelola Hero Section BIN Holding</h3>
+            <form id="form-bin-hero">
+              <div class="form-group">
+                <label for="bin-input-hero-badge">Badge Teks</label>
+                <input type="text" id="bin-input-hero-badge" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-hero-title">Headline Utama BIN</label>
+                <input type="text" id="bin-input-hero-title" class="form-control" required>
+                <div id="bin-hero-title-preview"></div>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-hero-subtitle">Subheadline / Deskripsi Group</label>
+                <textarea id="bin-input-hero-subtitle" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Background Hero BIN</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="bin-img-hero-preview" src="assets/images/hero-bg.png" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="bin-input-hero-image" class="form-control" placeholder="URL Foto Hero (e.g. /uploads/... atau assets/images/...)">
+                    <input type="file" id="bin-upload-hero-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('bin-upload-hero-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Hero
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="bin-input-hero-image" data-target-preview="bin-img-hero-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Content BIN Hero</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Tentang BIN -->
+        <div id="subtab-bin-about" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Profil Tentang BIN</h3>
+            <form id="form-bin-about">
+              <div class="form-group">
+                <label for="bin-input-about-title">Judul Utama Profil</label>
+                <input type="text" id="bin-input-about-title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-about-desc1">Deskripsi Paragraf 1</label>
+                <textarea id="bin-input-about-desc1" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-about-desc2">Deskripsi Paragraf 2</label>
+                <textarea id="bin-input-about-desc2" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Profil Tentang BIN</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="bin-img-about-preview" src="assets/images/about-training.png" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="bin-input-about-image" class="form-control" placeholder="URL Foto (e.g. /uploads/...)">
+                    <input type="file" id="bin-upload-about-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('bin-upload-about-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Baru
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="bin-input-about-image" data-target-preview="bin-img-about-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Profil BIN</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Kontak BIN -->
+        <div id="subtab-bin-contact" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Informasi Kontak BIN Group</h3>
+            <form id="form-bin-contact">
+              <div class="form-group">
+                <label for="bin-input-contact-address">Alamat Kantor Pusat</label>
+                <textarea id="bin-input-contact-address" class="form-control" rows="2" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-contact-phone">Nomor Telepon / Hotline</label>
+                <input type="text" id="bin-input-contact-phone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-contact-email">Email Kantor</label>
+                <input type="email" id="bin-input-contact-email" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="bin-input-contact-hours">Jam Operasional</label>
+                <textarea id="bin-input-contact-hours" class="form-control" rows="2" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Kontak BIN</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Galeri BIN -->
+        <div id="subtab-bin-gallery" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i data-lucide="images"></i> Kelola Galeri BIN Group</h3>
+              <button type="button" class="btn btn-primary btn-sm" onclick="switchTab('gallery')">
+                <i data-lucide="external-link"></i> Buka Editor Galeri Lengkap
+              </button>
+            </div>
+            <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+              Foto-foto ini tampil di galeri utama halaman depan <strong>Buwas Ikigai Nusantara (BIN)</strong>.
+            </p>
+            <div style="background:rgba(255,255,255,0.03); border:1px dashed var(--border-dark); border-radius:8px; padding:2rem; text-align:center;">
+              <i data-lucide="images" style="width:40px; height:40px; color:var(--primary); margin-bottom:0.75rem;"></i>
+              <p style="margin-bottom:1rem; color:var(--text-light);">Galeri utama dapat dikelola langsung dari tab Galeri & Portofolio</p>
+              <button type="button" class="btn btn-primary" onclick="switchTab('gallery')">
+                <i data-lucide="arrow-right"></i> Kelola Galeri Utama Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: PROCOOL (HVAC) MANAGER
+           ============================================ -->
+      <section id="tab-procool-content" class="tab-panel" style="display: none;">
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" data-subtab="procool-hero">Hero Section</button>
+          <button class="sub-tab-btn" data-subtab="procool-about">Tentang Procool</button>
+          <button class="sub-tab-btn" data-subtab="procool-contact">Info Kontak</button>
+          <button class="sub-tab-btn" data-subtab="procool-gallery">🖼️ Galeri Procool</button>
+        </div>
+
+        <!-- Subtab Hero Procool -->
+        <div id="subtab-procool-hero" class="subtab-panel">
+          <div class="panel">
+            <h3>Kelola Hero Procool (HVAC)</h3>
+            <form id="form-procool-hero">
+              <div class="form-group">
+                <label for="procool-input-hero-title">Headline Utama Procool</label>
+                <input type="text" id="procool-input-hero-title" class="form-control" required>
+                <div id="procool-hero-title-preview"></div>
+              </div>
+              <div class="form-group">
+                <label for="procool-input-hero-subtitle">Subheadline Procool</label>
+                <textarea id="procool-input-hero-subtitle" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Background Hero Procool</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="procool-img-hero-preview" src="assets/images/procool-bg.jpg" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="procool-input-hero-image" class="form-control" placeholder="URL Foto Hero (e.g. /uploads/... atau assets/images/...)">
+                    <input type="file" id="procool-upload-hero-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('procool-upload-hero-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Hero
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="procool-input-hero-image" data-target-preview="procool-img-hero-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#2563EB;border-color:#2563EB;"><i data-lucide="save"></i> Simpan Hero Procool</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Tentang Procool -->
+        <div id="subtab-procool-about" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Tentang Procool</h3>
+            <form id="form-procool-about">
+              <div class="form-group">
+                <label for="procool-input-about-title">Judul Utama tentang Procool</label>
+                <input type="text" id="procool-input-about-title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="procool-input-about-desc1">Deskripsi Paragraf 1</label>
+                <textarea id="procool-input-about-desc1" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="procool-input-about-desc2">Deskripsi Paragraf 2</label>
+                <textarea id="procool-input-about-desc2" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Profil / Layanan Procool</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="procool-img-about-preview" src="assets/images/procool-bg.jpg" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="procool-input-about-image" class="form-control" placeholder="URL Foto Procool">
+                    <input type="file" id="procool-upload-about-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('procool-upload-about-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Procool
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="procool-input-about-image" data-target-preview="procool-img-about-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#2563EB;border-color:#2563EB;"><i data-lucide="save"></i> Simpan Tentang Procool</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Kontak Procool -->
+        <div id="subtab-procool-contact" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Kontak Layanan Procool</h3>
+            <form id="form-procool-contact">
+              <div class="form-group">
+                <label for="procool-input-contact-phone">Telepon / WhatsApp Layanan</label>
+                <input type="text" id="procool-input-contact-phone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="procool-input-contact-email">Email Pelanggan</label>
+                <input type="email" id="procool-input-contact-email" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="procool-input-contact-hours">Jam Operasional</label>
+                <textarea id="procool-input-contact-hours" class="form-control" rows="2" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#2563EB;border-color:#2563EB;"><i data-lucide="save"></i> Simpan Kontak Procool</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Galeri Procool -->
+        <div id="subtab-procool-gallery" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i data-lucide="images"></i> Kelola Galeri Procool</h3>
+              <button type="button" class="btn btn-primary btn-sm add-page-gallery-btn" data-page="procool">
+                <i data-lucide="plus"></i> Tambah Foto
+              </button>
+            </div>
+            <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+              Foto-foto ini tampil khusus di halaman galeri <strong>Procool HVAC</strong>.
+            </p>
+            <div id="gallery-procool-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;"></div>
+            <div style="margin-top:1.5rem; text-align:right;">
+              <button type="button" class="btn btn-primary save-page-gallery-btn" data-page="procool" style="background:#2563EB;border-color:#2563EB;">
+                <i data-lucide="save"></i> Simpan Galeri Procool
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: KONSULTASI HUKUM MANAGER
+           ============================================ -->
+      <section id="tab-legal-content" class="tab-panel" style="display: none;">
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" data-subtab="legal-hero">Hero Section</button>
+          <button class="sub-tab-btn" data-subtab="legal-about">Tentang Layanan</button>
+          <button class="sub-tab-btn" data-subtab="legal-contact">Info Kontak</button>
+          <button class="sub-tab-btn" data-subtab="legal-gallery">🖼️ Galeri Konsultasi Hukum</button>
+        </div>
+
+        <!-- Subtab Hero Legal -->
+        <div id="subtab-legal-hero" class="subtab-panel">
+          <div class="panel">
+            <h3>Kelola Hero Konsultasi Hukum</h3>
+            <form id="form-legal-hero">
+              <div class="form-group">
+                <label for="legal-input-hero-title">Headline Utama Konsultasi Hukum</label>
+                <input type="text" id="legal-input-hero-title" class="form-control" required>
+                <div id="legal-hero-title-preview"></div>
+              </div>
+              <div class="form-group">
+                <label for="legal-input-hero-subtitle">Subheadline Legal Services</label>
+                <textarea id="legal-input-hero-subtitle" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Background Hero Legal</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="legal-img-hero-preview" src="assets/images/legal-bg.jpg" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="legal-input-hero-image" class="form-control" placeholder="URL Foto Hero (e.g. /uploads/... atau assets/images/...)">
+                    <input type="file" id="legal-upload-hero-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('legal-upload-hero-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Hero
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="legal-input-hero-image" data-target-preview="legal-img-hero-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#8B5CF6;border-color:#8B5CF6;"><i data-lucide="save"></i> Simpan Hero Legal</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Tentang Legal -->
+        <div id="subtab-legal-about" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Tentang Layanan Hukum</h3>
+            <form id="form-legal-about">
+              <div class="form-group">
+                <label for="legal-input-about-title">Judul Utama tentang Layanan Hukum</label>
+                <input type="text" id="legal-input-about-title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="legal-input-about-desc1">Deskripsi Paragraf 1</label>
+                <textarea id="legal-input-about-desc1" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="legal-input-about-desc2">Deskripsi Paragraf 2</label>
+                <textarea id="legal-input-about-desc2" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Profil Layanan Hukum</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="legal-img-about-preview" src="assets/images/legal-bg.jpg" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="legal-input-about-image" class="form-control" placeholder="URL Foto Hukum">
+                    <input type="file" id="legal-upload-about-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('legal-upload-about-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Hukum
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="legal-input-about-image" data-target-preview="legal-img-about-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#8B5CF6;border-color:#8B5CF6;"><i data-lucide="save"></i> Simpan Tentang Legal</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Kontak Legal -->
+        <div id="subtab-legal-contact" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Kontak Konsultasi Hukum</h3>
+            <form id="form-legal-contact">
+              <div class="form-group">
+                <label for="legal-input-contact-phone">Telepon / WhatsApp Legal</label>
+                <input type="text" id="legal-input-contact-phone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="legal-input-contact-email">Email Konsultasi Legal</label>
+                <input type="email" id="legal-input-contact-email" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="legal-input-contact-hours">Jam Operasional</label>
+                <textarea id="legal-input-contact-hours" class="form-control" rows="2" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#8B5CF6;border-color:#8B5CF6;"><i data-lucide="save"></i> Simpan Kontak Legal</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Galeri Legal -->
+        <div id="subtab-legal-gallery" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i data-lucide="images"></i> Kelola Galeri Konsultasi Hukum</h3>
+              <button type="button" class="btn btn-primary btn-sm add-page-gallery-btn" data-page="legal">
+                <i data-lucide="plus"></i> Tambah Foto
+              </button>
+            </div>
+            <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+              Foto-foto ini tampil khusus di halaman galeri <strong>Konsultasi Hukum</strong>.
+            </p>
+            <div id="gallery-legal-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;"></div>
+            <div style="margin-top:1.5rem; text-align:right;">
+              <button type="button" class="btn btn-primary save-page-gallery-btn" data-page="legal" style="background:#8B5CF6;border-color:#8B5CF6;">
+                <i data-lucide="save"></i> Simpan Galeri Legal
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: JASA GEOTEKNIK MANAGER
+           ============================================ -->
+      <section id="tab-geoteknik-content" class="tab-panel" style="display: none;">
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" data-subtab="geoteknik-hero">Hero Section</button>
+          <button class="sub-tab-btn" data-subtab="geoteknik-about">Tentang Geoteknik</button>
+          <button class="sub-tab-btn" data-subtab="geoteknik-contact">Info Kontak</button>
+          <button class="sub-tab-btn" data-subtab="geoteknik-gallery">🖼️ Galeri Jasa Geoteknik</button>
+        </div>
+
+        <!-- Subtab Hero Geoteknik -->
+        <div id="subtab-geoteknik-hero" class="subtab-panel">
+          <div class="panel">
+            <h3>Kelola Hero Jasa Geoteknik</h3>
+            <form id="form-geoteknik-hero">
+              <div class="form-group">
+                <label for="geoteknik-input-hero-title">Headline Utama Geoteknik</label>
+                <input type="text" id="geoteknik-input-hero-title" class="form-control" required>
+                <div id="geoteknik-hero-title-preview"></div>
+              </div>
+              <div class="form-group">
+                <label for="geoteknik-input-hero-subtitle">Subheadline Geoteknik</label>
+                <textarea id="geoteknik-input-hero-subtitle" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Background Hero Geoteknik</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="geoteknik-img-hero-preview" src="assets/images/geoteknik-bg.jpg" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="geoteknik-input-hero-image" class="form-control" placeholder="URL Foto Hero (e.g. /uploads/... atau assets/images/...)">
+                    <input type="file" id="geoteknik-upload-hero-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('geoteknik-upload-hero-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Hero
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="geoteknik-input-hero-image" data-target-preview="geoteknik-img-hero-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#059669;border-color:#059669;"><i data-lucide="save"></i> Simpan Hero Geoteknik</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Tentang Geoteknik -->
+        <div id="subtab-geoteknik-about" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Tentang Jasa Geoteknik</h3>
+            <form id="form-geoteknik-about">
+              <div class="form-group">
+                <label for="geoteknik-input-about-title">Judul Utama tentang Geoteknik</label>
+                <input type="text" id="geoteknik-input-about-title" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="geoteknik-input-about-desc1">Deskripsi Paragraf 1</label>
+                <textarea id="geoteknik-input-about-desc1" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label for="geoteknik-input-about-desc2">Deskripsi Paragraf 2</label>
+                <textarea id="geoteknik-input-about-desc2" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Profil Jasa Geoteknik</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="geoteknik-img-about-preview" src="assets/images/geoteknik-bg.jpg" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="geoteknik-input-about-image" class="form-control" placeholder="URL Foto Geoteknik">
+                    <input type="file" id="geoteknik-upload-about-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('geoteknik-upload-about-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Geoteknik
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="geoteknik-input-about-image" data-target-preview="geoteknik-img-about-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#059669;border-color:#059669;"><i data-lucide="save"></i> Simpan Tentang Geoteknik</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Kontak Geoteknik -->
+        <div id="subtab-geoteknik-contact" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <h3>Kelola Kontak Inquiry Geoteknik</h3>
+            <form id="form-geoteknik-contact">
+              <div class="form-group">
+                <label for="geoteknik-input-contact-phone">Telepon / WhatsApp Geoteknik</label>
+                <input type="text" id="geoteknik-input-contact-phone" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="geoteknik-input-contact-email">Email Pertanyaan Proyek</label>
+                <input type="email" id="geoteknik-input-contact-email" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="geoteknik-input-contact-hours">Jam Operasional Field Test</label>
+                <textarea id="geoteknik-input-contact-hours" class="form-control" rows="2" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="background:#059669;border-color:#059669;"><i data-lucide="save"></i> Simpan Kontak Geoteknik</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Subtab Galeri Geoteknik -->
+        <div id="subtab-geoteknik-gallery" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i data-lucide="images"></i> Kelola Galeri Jasa Geoteknik</h3>
+              <button type="button" class="btn btn-primary btn-sm add-page-gallery-btn" data-page="geoteknik">
+                <i data-lucide="plus"></i> Tambah Foto
+              </button>
+            </div>
+            <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+              Foto-foto ini tampil khusus di halaman galeri <strong>Jasa Geoteknik</strong>.
+            </p>
+            <div id="gallery-geoteknik-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;"></div>
+            <div style="margin-top:1.5rem; text-align:right;">
+              <button type="button" class="btn btn-primary save-page-gallery-btn" data-page="geoteknik" style="background:#059669;border-color:#059669;">
+                <i data-lucide="save"></i> Simpan Galeri Geoteknik
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: LPK BUWAS IKIGAI CONTENT MANAGER
+           ============================================ -->
+      <section id="tab-lpk-content" class="tab-panel" style="display: none;">
         <div class="sub-tabs">
           <button class="sub-tab-btn active" data-subtab="content-hero">Hero Section</button>
           <button class="sub-tab-btn" data-subtab="content-about">Tentang Kami</button>
@@ -209,6 +782,7 @@
           <button class="sub-tab-btn" data-subtab="content-testimonials">Testimoni</button>
           <button class="sub-tab-btn" data-subtab="content-faq">FAQ</button>
           <button class="sub-tab-btn" data-subtab="content-contact">Info Kontak</button>
+          <button class="sub-tab-btn" data-subtab="content-gallery-lpk">🖼️ Galeri LPK</button>
         </div>
 
         <!-- Form Hero Section -->
@@ -227,6 +801,24 @@
               <div class="form-group">
                 <label for="hero-subtitle">Subheadline</label>
                 <textarea id="hero-subtitle" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Background Hero LPK</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="lpk-img-hero-preview" src="assets/images/hero-bg.png" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="lpk-input-hero-image" class="form-control" placeholder="URL Foto Hero (e.g. /uploads/... atau assets/images/...)">
+                    <input type="file" id="lpk-upload-hero-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('lpk-upload-hero-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto Hero
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="lpk-input-hero-image" data-target-preview="lpk-img-hero-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="grid-2" style="display: grid; gap: 1rem;">
                 <div class="form-group">
@@ -267,6 +859,24 @@
               <div class="form-group">
                 <label for="about-desc3">Paragraf 3</label>
                 <textarea id="about-desc3" class="form-control" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Foto Profil LPK</label>
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:0.5rem;">
+                  <img id="lpk-img-about-preview" src="assets/images/about-training.png" style="width:140px; height:85px; object-fit:cover; border-radius:8px; border:1px solid var(--border-dark);">
+                  <div style="flex:1; min-width:240px;">
+                    <input type="text" id="about-image" class="form-control" placeholder="URL Foto LPK">
+                    <input type="file" id="lpk-upload-about-image" accept="image/*" style="display:none;">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                      <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('lpk-upload-about-image').click()">
+                        <i data-lucide="upload"></i> Upload Foto LPK
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="about-image" data-target-preview="lpk-img-about-preview">
+                        <i data-lucide="image"></i> Pilih dari Media
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Perubahan</button>
             </form>
@@ -359,6 +969,27 @@
             </form>
           </div>
         </div>
+
+        <!-- Galeri LPK Manager -->
+        <div id="subtab-content-gallery-lpk" class="subtab-panel" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i data-lucide="images"></i> Kelola Galeri LPK Buwas Ikigai</h3>
+              <button type="button" class="btn btn-primary btn-sm add-page-gallery-btn" data-page="lpk">
+                <i data-lucide="plus"></i> Tambah Foto
+              </button>
+            </div>
+            <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+              Foto-foto ini tampil khusus di halaman galeri <strong>LPK Buwas Ikigai Nusantara</strong>.
+            </p>
+            <div id="gallery-lpk-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;"></div>
+            <div style="margin-top:1.5rem; text-align:right;">
+              <button type="button" class="btn btn-primary save-page-gallery-btn" data-page="lpk">
+                <i data-lucide="save"></i> Simpan Galeri LPK
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ============================================
@@ -398,13 +1029,63 @@
       </section>
 
       <!-- ============================================
+           TAB: GALERI & PORTOFOLIO MANAGER
+           ============================================ -->
+      <section id="tab-gallery" class="tab-panel" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i data-lucide="images"></i> Kelola Galeri & Portofolio</h3>
+            <button type="button" id="add-gallery-btn" class="btn btn-primary btn-sm">
+              <i data-lucide="plus"></i> Tambah Foto Galeri Baru
+            </button>
+          </div>
+          <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+            Foto-foto ini akan tampil di bagian Galeri Dokumentasi Kegiatan pada website publik.
+          </p>
+          
+          <div id="gallery-list-container" class="testimonials-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           TAB: MITRA & PARTNER MANAGER
+           ============================================ -->
+      <section id="tab-partners" class="tab-panel" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3><i data-lucide="handshake"></i> Kelola Mitra & Partner</h3>
+            <button type="button" id="add-partner-btn" class="btn btn-primary btn-sm">
+              <i data-lucide="plus"></i> Tambah Partner Baru
+            </button>
+          </div>
+          <p style="color:var(--text-light); font-size:0.875rem; margin-bottom:1.5rem;">
+            Daftar perusahaan & institusi mitra yang tampil pada slider/marquee partner.
+          </p>
+          
+          <div id="partners-list-container" class="testimonials-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================
            TAB: FORM SUBMISSIONS
            ============================================ -->
       <section id="tab-submissions" class="tab-panel" style="display: none;">
         <div class="panel">
-          <div class="panel-header">
-            <h3>Daftar Pesan Masuk</h3>
-            <div style="display: flex; gap: 0.5rem;">
+          <div class="panel-header" style="flex-wrap: wrap; gap: 1rem; align-items: center;">
+            <h3>Daftar Pesan Masuk / Pendaftar</h3>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              <label for="submission-service-filter" style="font-weight: 500; font-size: 0.875rem; margin-bottom: 0;">Filter Service:</label>
+              <select id="submission-service-filter" class="form-control" style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.875rem;">
+                <option value="all">Semua Pendaftar</option>
+                <option value="lpk">LPK Buwas Ikigai Nusantara</option>
+                <option value="procool">Procool</option>
+                <option value="legal">Konsultasi Hukum</option>
+                <option value="geoteknik">Jasa Geoteknik</option>
+              </select>
               <button id="export-csv-btn" class="btn btn-outline-success btn-sm">
                 <i data-lucide="download"></i> Ekspor CSV
               </button>
@@ -418,13 +1099,12 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th>Tanggal</th>
-                  <th>Nama Pengirim</th>
-                  <th>Email</th>
-                  <th>Telepon</th>
-                  <th>Program Minat</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
+                  <th style="width: 14%;">Tanggal</th>
+                  <th style="width: 18%;">Service</th>
+                  <th style="width: 26%;">Pengirim & Kontak</th>
+                  <th style="width: 20%;">Program / Kebutuhan</th>
+                  <th style="width: 12%;">Status</th>
+                  <th style="width: 10%; text-align: center;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="submissions-table-body">
@@ -522,15 +1202,32 @@
 
           <div class="form-group">
             <label for="article-content">Konten Artikel <span style="color:var(--danger);">*</span></label>
-            <textarea id="article-content" class="form-control" rows="10" placeholder="Tulis konten artikel di sini..." required></textarea>
+            
+            <!-- Quick Format Toolbar -->
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.5rem; background:rgba(255,255,255,0.03); padding:0.5rem; border-radius:6px; border:1px solid var(--border-dark);">
+              <button type="button" class="btn btn-outline btn-sm article-fmt-btn" data-fmt="bold" title="Tebal"><i data-lucide="bold" style="width:14px;height:14px;"></i> Tebal</button>
+              <button type="button" class="btn btn-outline btn-sm article-fmt-btn" data-fmt="italic" title="Miring"><i data-lucide="italic" style="width:14px;height:14px;"></i> Miring</button>
+              <button type="button" class="btn btn-outline btn-sm article-fmt-btn" data-fmt="h2" title="Judul H2">H2</button>
+              <button type="button" class="btn btn-outline btn-sm article-fmt-btn" data-fmt="h3" title="Subjudul H3">H3</button>
+              <button type="button" class="btn btn-outline btn-sm article-fmt-btn" data-fmt="ul" title="Daftar Bullet"><i data-lucide="list" style="width:14px;height:14px;"></i> Daftar</button>
+              <button type="button" class="btn btn-outline btn-sm article-fmt-btn" data-fmt="quote" title="Kutipan"><i data-lucide="quote" style="width:14px;height:14px;"></i> Kutipan</button>
+              <button type="button" class="btn btn-outline-info btn-sm" id="article-insert-media-btn" title="Sisip Gambar"><i data-lucide="image" style="width:14px;height:14px;"></i> Sisip Gambar</button>
+              <button type="button" class="btn btn-outline-success btn-sm" id="article-toggle-preview-btn" style="margin-left:auto;"><i data-lucide="eye" style="width:14px;height:14px;"></i> Pratinjau Tampilan</button>
+            </div>
+
+            <textarea id="article-content" class="form-control" rows="10" placeholder="Tulis konten artikel di sini... (Mendukung HTML & Paragraf)" required></textarea>
+            
+            <!-- Live Preview Container -->
+            <div id="article-content-preview" style="display:none; margin-top:0.75rem; padding:1.25rem; background:rgba(0,0,0,0.2); border:1px dashed var(--primary); border-radius:8px; line-height:1.7;">
+            </div>
           </div>
 
           <!-- Upload Gambar -->
           <div class="form-group">
-            <label>Gambar Artikel (Firebase Storage)</label>
-            <div class="upload-dropzone" id="article-img-dropzone" style="padding:1.5rem;">
-              <i data-lucide="image-plus" style="width:36px;height:36px;color:var(--text-light);margin-bottom:0.75rem;"></i>
-              <p>Klik atau drag gambar ke sini</p>
+            <label>Gambar Utam / Header Artikel</label>
+            <div class="upload-dropzone" id="article-img-dropzone" style="padding:1.25rem;">
+              <i data-lucide="image-plus" style="width:36px;height:36px;color:var(--text-light);margin-bottom:0.5rem;"></i>
+              <p>Klik atau drag gambar ke sini untuk upload</p>
               <p class="small" style="color:var(--text-light);margin-top:0.25rem;">Format: JPG, JPEG, PNG, WEBP (Maks 5MB)</p>
               <input type="file" id="article-img-input" style="display:none;" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
             </div>
@@ -545,13 +1242,16 @@
             <div id="article-img-preview-wrap" style="display:none; margin-top:0.75rem;">
               <img id="article-img-preview" src="" alt="Preview" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--border-color);object-fit:cover;">
               <div style="margin-top:0.5rem;display:flex;gap:0.5rem;align-items:center;">
-                <input type="text" id="article-imageUrl" class="form-control" placeholder="URL gambar dari Firebase Storage" style="flex:1;">
+                <input type="text" id="article-imageUrl" class="form-control" placeholder="URL gambar artikel" style="flex:1;">
                 <button type="button" id="article-img-remove" class="btn btn-outline-danger btn-sm">Hapus Gambar</button>
               </div>
             </div>
-            <!-- Field URL manual (jika belum upload) -->
-            <div id="article-img-url-field" style="margin-top:0.5rem;">
-              <input type="text" id="article-imageUrl-manual" class="form-control" placeholder="Atau masukkan URL gambar secara manual">
+            <!-- Field URL manual + Media Selector -->
+            <div id="article-img-url-field" style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+              <input type="text" id="article-imageUrl-manual" class="form-control" placeholder="Atau masukkan URL gambar secara manual" style="flex:1;">
+              <button type="button" class="btn btn-outline-info btn-sm open-media-selector-btn" data-target-input="article-imageUrl-manual" data-target-preview="article-img-preview" style="white-space:nowrap;">
+                <i data-lucide="image"></i> Pilih dari Media
+              </button>
             </div>
           </div>
 
@@ -620,14 +1320,29 @@
   <div id="submission-modal" class="modal" role="dialog" aria-modal="true" style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Detail Pesan Masuk</h3>
+        <h3>Detail Pesan / Pendaftar</h3>
         <button class="modal-close" id="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
         <table class="detail-table">
           <tr>
-            <th>Tanggal Masuk</th>
+            <th>Tanggal Submit</th>
             <td id="modal-date"></td>
+          </tr>
+          <tr>
+            <th>Service Asal</th>
+            <td id="modal-service"></td>
+          </tr>
+          <tr>
+            <th>Status Pendaftar</th>
+            <td id="modal-status-cell">
+              <select id="modal-status-select" class="form-control" style="width: auto; display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.875rem;">
+                <option value="new">Baru (new)</option>
+                <option value="read">Sudah Dibaca (read)</option>
+                <option value="in_progress">Diproses (in_progress)</option>
+                <option value="completed">Selesai (completed)</option>
+              </select>
+            </td>
           </tr>
           <tr>
             <th>Nama Pengirim</th>
@@ -638,15 +1353,15 @@
             <td id="modal-email"></td>
           </tr>
           <tr>
-            <th>Telepon</th>
+            <th>Telepon / WA</th>
             <td id="modal-phone"></td>
           </tr>
           <tr>
-            <th>Program Diminati</th>
+            <th>Program / Layanan</th>
             <td id="modal-program"></td>
           </tr>
           <tr>
-            <th>Isi Pesan</th>
+            <th>Pesan / Kebutuhan</th>
             <td>
               <div class="modal-message-box" id="modal-message"></div>
             </td>
@@ -654,8 +1369,42 @@
         </table>
       </div>
       <div class="modal-footer">
-        <button id="modal-mark-read-btn" class="btn btn-primary btn-sm">Tandai Sudah Dibaca</button>
+        <button id="modal-save-status-btn" class="btn btn-primary btn-sm">Simpan Status</button>
         <button id="modal-delete-btn" class="btn btn-outline-danger btn-sm">Hapus Pesan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       MEDIA SELECTOR DIALOG (MODAL)
+       ============================================ -->
+  <div id="media-selector-modal" class="modal" role="dialog" aria-modal="true" style="display: none; z-index: 10000;">
+    <div class="modal-content" style="max-width: 850px; width: 92%;">
+      <div class="modal-header">
+        <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="image"></i> Pilih Gambar dari Media Library</h3>
+        <button class="modal-close" id="media-selector-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem;">
+          <input type="text" id="media-selector-search" class="form-control" placeholder="Cari nama file..." style="max-width: 280px; padding:0.4rem 0.75rem; font-size:0.875rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <input type="file" id="media-selector-file-input" accept="image/*" style="display:none;">
+            <button type="button" id="media-selector-upload-btn" class="btn btn-outline-success btn-sm">
+              <i data-lucide="upload"></i> Upload File Baru
+            </button>
+            <button type="button" id="media-selector-refresh-btn" class="btn btn-outline btn-sm">
+              <i data-lucide="refresh-cw"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="media-selector-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; max-height: 420px; overflow-y: auto; padding: 4px;">
+          <!-- Media list populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="media-selector-selected-url" style="font-size:0.75rem; color:var(--text-light); text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:60%;">Belum ada file yang dipilih</span>
+        <button type="button" id="media-selector-cancel-btn" class="btn btn-outline btn-sm">Batal</button>
       </div>
     </div>
   </div>

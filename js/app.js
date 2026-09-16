@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
       renderAbout(data.content.about);
       renderVisiMisi(data.content.visi_misi);
       renderContactInfo(data.content.contact_info);
-      renderGallery(data.gallery);
       renderTestimonials(data.testimonials);
       renderPartners(data.partners);
       renderFaq(data.faq);
@@ -35,10 +34,24 @@ document.addEventListener('DOMContentLoaded', () => {
       // Re-initialize dynamic elements since DOM updated
       initIcons();
       reinitFaq();
-      reinitGallery();
       reinitTestimonials();
     } catch (err) {
       console.log('Using static content fallback:', err.message);
+    }
+
+    // Load LPK-specific gallery (separate request)
+    try {
+      const galRes = await fetch('/api/content/gallery/lpk');
+      if (galRes.ok) {
+        const galData = await galRes.json();
+        if (Array.isArray(galData) && galData.length > 0) {
+          renderGallery(galData);
+          initIcons();
+          reinitGallery();
+        }
+      }
+    } catch (err) {
+      console.log('LPK gallery fallback (using static):', err.message);
     }
   }
 
@@ -60,18 +73,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     if (subtitleEl) subtitleEl.textContent = hero.subtitle;
+
+    const heroBg = document.getElementById('hero-bg');
+    if (heroBg && hero.bg_image) {
+      heroBg.src = hero.bg_image;
+    }
   }
 
   function renderAbout(about) {
     if (!about) return;
-    const titleEl = document.querySelector('.about-content h2');
-    const badgeNumEl = document.querySelector('.about-badge .badge-number');
-    const pElements = document.querySelectorAll('.about-content p');
-    
+    const titleEl = document.querySelector('.about-content .section-title');
     if (titleEl) titleEl.textContent = about.title;
-    if (badgeNumEl) badgeNumEl.textContent = about.experience;
     
-    // Replace description paragraphs
+    const badgeEl = document.querySelector('.about-badge .badge-number');
+    if (badgeEl) badgeEl.textContent = about.experience;
+    
+    const lpkImg = document.getElementById('lpk-about-img');
+    if (lpkImg && about.image) lpkImg.src = about.image;
+
     const contentDiv = document.querySelector('.about-content');
     if (contentDiv) {
       // Remove old paragraph elements
@@ -592,13 +611,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (allValid) {
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<i data-lucide="loader" class="spin"></i> Mengirim...`;
+        }
+
         // Collect form data
         const formData = {
           name: document.getElementById('name').value,
           email: document.getElementById('email').value,
           phone: document.getElementById('phone').value,
-          program: document.getElementById('program-select').value,
-          message: document.getElementById('message').value
+          program: document.getElementById('program-select') ? document.getElementById('program-select').value : '-',
+          message: document.getElementById('message').value,
+          serviceType: 'lpk',
+          serviceName: 'LPK Buwas Ikigai Nusantara',
+          status: 'new'
         };
 
         try {
@@ -611,15 +640,21 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!res.ok) throw new Error('Gagal mengirim pesan');
 
           // Show success message
-          formSuccess.classList.add('show');
+          if (formSuccess) formSuccess.classList.add('show');
           contactForm.reset();
 
           // Hide success message after 5 seconds
           setTimeout(() => {
-            formSuccess.classList.remove('show');
+            if (formSuccess) formSuccess.classList.remove('show');
           }, 5000);
         } catch (err) {
           alert('Gagal mengirim pesan. Silakan coba kembali beberapa saat lagi.');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml;
+            if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+          }
         }
       }
     });

@@ -150,6 +150,84 @@
         }
       });
     }
+
+    // Toolbar formatting & Pratinjau
+    const contentTextarea = document.getElementById('article-content');
+    const previewContainer = document.getElementById('article-content-preview');
+    const togglePreviewBtn = document.getElementById('article-toggle-preview-btn');
+    const insertMediaBtn = document.getElementById('article-insert-media-btn');
+
+    document.querySelectorAll('.article-fmt-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const fmt = btn.getAttribute('data-fmt');
+        applyContentFormat(contentTextarea, fmt);
+      });
+    });
+
+    if (insertMediaBtn) {
+      insertMediaBtn.addEventListener('click', function() {
+        if (typeof window.openMediaSelector === 'function') {
+          window.openMediaSelector(function(url) {
+            insertTextAtCursor(contentTextarea, '<img src="' + url + '" alt="Gambar Artikel" style="max-width:100%; border-radius:8px; margin:1rem 0;">');
+          });
+        }
+      });
+    }
+
+    if (togglePreviewBtn && previewContainer && contentTextarea) {
+      togglePreviewBtn.addEventListener('click', function() {
+        if (previewContainer.style.display === 'none') {
+          previewContainer.innerHTML = contentTextarea.value || '<em>Konten masih kosong...</em>';
+          previewContainer.style.display = 'block';
+          togglePreviewBtn.innerHTML = '<i data-lucide="eye-off" style="width:14px;height:14px;"></i> Tutup Pratinjau';
+        } else {
+          previewContainer.style.display = 'none';
+          togglePreviewBtn.innerHTML = '<i data-lucide="eye" style="width:14px;height:14px;"></i> Pratinjau Tampilan';
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      });
+
+      contentTextarea.addEventListener('input', function() {
+        if (previewContainer.style.display === 'block') {
+          previewContainer.innerHTML = contentTextarea.value || '<em>Konten masih kosong...</em>';
+        }
+      });
+    }
+  }
+
+  function applyContentFormat(textarea, fmt) {
+    if (!textarea) return;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+
+    let replacement = '';
+    if (fmt === 'bold') replacement = '<b>' + (selected || 'teks tebal') + '</b>';
+    else if (fmt === 'italic') replacement = '<i>' + (selected || 'teks miring') + '</i>';
+    else if (fmt === 'h2') replacement = '<h2>' + (selected || 'Judul Bagian H2') + '</h2>';
+    else if (fmt === 'h3') replacement = '<h3>' + (selected || 'Subjudul H3') + '</h3>';
+    else if (fmt === 'ul') replacement = '<ul>\n  <li>Poin pertama</li>\n  <li>Poin kedua</li>\n</ul>';
+    else if (fmt === 'quote') replacement = '<blockquote>' + (selected || 'Kutipan penting...') + '</blockquote>';
+
+    textarea.value = text.substring(0, start) + replacement + text.substring(end);
+    textarea.focus();
+    textarea.selectionStart = start + replacement.length;
+    textarea.selectionEnd = start + replacement.length;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function insertTextAtCursor(textarea, textToInsert) {
+    if (!textarea) return;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const val = textarea.value;
+
+    textarea.value = val.substring(0, start) + textToInsert + val.substring(end);
+    textarea.focus();
+    textarea.selectionStart = start + textToInsert.length;
+    textarea.selectionEnd = start + textToInsert.length;
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   // ─── Upload Dropzone ─────────────────────────────────────────────────────────
@@ -205,31 +283,45 @@
     try {
       // Gunakan articleId jika sedang edit, atau 'temp' untuk artikel baru
       const articleId = currentEditId || 'temp-' + Date.now();
+      let downloadUrl = '';
 
-      const downloadUrl = await window.fbUploadArticleImage(
-        file,
-        articleId,
-        function(percent) {
-          if (progressBar) progressBar.style.width = percent + '%';
-          if (progressText) progressText.textContent = 'Mengupload... ' + percent + '%';
-        }
-      );
+      try {
+        downloadUrl = await window.fbUploadArticleImage(
+          file,
+          articleId,
+          function(percent) {
+            if (progressBar) progressBar.style.width = percent + '%';
+            if (progressText) progressText.textContent = 'Mengupload... ' + percent + '%';
+          }
+        );
+      } catch (fbErr) {
+        console.warn('[Articles Controller] Firebase Storage failed, falling back to local server upload:', fbErr.message);
+        if (progressText) progressText.textContent = 'Mengupload ke server...';
+
+        const token = localStorage.getItem('heti_admin_token');
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const res = await fetch('/api/media/upload', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Upload server gagal');
+        downloadUrl = data.file.url;
+      }
 
       // Upload berhasil
       if (progressWrap) progressWrap.style.display = 'none';
       setArticleImagePreview(downloadUrl);
-      showAdminToast('Gambar berhasil diupload ke Firebase Storage!');
+      showAdminToast('Gambar artikel berhasil diupload!');
 
     } catch (err) {
       if (progressWrap) progressWrap.style.display = 'none';
       if (urlField) urlField.style.display = 'block';
-
-      // Jika Firebase belum dikonfigurasi, tampilkan pesan yang membantu
-      if (err.message.includes('belum dikonfigurasi')) {
-        showArticleFormError('Firebase Storage belum dikonfigurasi. Gunakan URL manual di bawah.');
-      } else {
-        showArticleFormError('Upload gagal: ' + err.message);
-      }
+      showArticleFormError('Upload gambar gagal: ' + err.message);
     }
   }
 

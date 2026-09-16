@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Konsultasi Hukum Bisnis",
+    "src": "assets/images/legal-bg.jpg",
+    "desc": "Pendampingan legal usaha dan kontrak bisnis",
+    "alt": "Konsultasi Hukum Bisnis"
+  },
+  {
+    "title": "Legal Drafting Kontrak",
+    "src": "assets/images/legal-bg.jpg",
+    "desc": "Review dan penyusunan perjanjian perusahaan",
+    "alt": "Legal Drafting Kontrak"
+  },
+  {
+    "title": "Perizinan OSS RBA",
+    "src": "assets/images/legal-bg.jpg",
+    "desc": "Pengurusan izin usaha berbasis risiko",
+    "alt": "Perizinan OSS RBA"
+  },
+  {
+    "title": "Konsultasi CInta",
+    "src": "/uploads/img-1788933520096-891320078.jpg",
+    "desc": "percintaan",
+    "alt": "Konsultasi cinta"
+  }
+]

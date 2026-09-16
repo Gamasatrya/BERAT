@@ -1,0 +1,38 @@
+[
+  {
+    "src": "assets/images/gallery-excavator.png",
+    "alt": "Pelatihan Excavator",
+    "title": "Pelatihan Excavator",
+    "desc": "Praktik langsung di area pelatihan"
+  },
+  {
+    "src": "assets/images/gallery-crane.png",
+    "alt": "Simulasi Crane",
+    "title": "Simulasi Crane",
+    "desc": "Pelatihan pengangkatan beban"
+  },
+  {
+    "src": "assets/images/gallery-forklift.png",
+    "alt": "Training Forklift",
+    "title": "Training Forklift",
+    "desc": "Pelatihan di area warehouse"
+  },
+  {
+    "src": "assets/images/gallery-safety.png",
+    "alt": "Safety Briefing",
+    "title": "Safety Briefing",
+    "desc": "Pengarahan keselamatan kerja"
+  },
+  {
+    "src": "assets/images/about-training.png",
+    "alt": "Praktik Lapangan",
+    "title": "Praktik Lapangan",
+    "desc": "Pelatihan dengan alat berat sesungguhnya"
+  },
+  {
+    "src": "assets/images/hero-bg.png",
+    "alt": "Sertifikasi Operator",
+    "title": "Sertifikasi Operator",
+    "desc": "Program sertifikasi profesional"
+  }
+]

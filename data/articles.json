@@ -1,0 +1,24 @@
+[
+  {
+    "id": "art-1",
+    "title": "Mengenal Sertifikasi BNSP Operator Alat Berat",
+    "slug": "mengenal-sertifikasi-bnsp-operator-alat-berat",
+    "excerpt": "Pentingnya sertifikasi resmi BNSP untuk karir profesional operator excavator, bulldozer, dan loader.",
+    "content": "<p>Sertifikasi BNSP (Badan Nasional Sertifikasi Profesi) merupakan bukti kompetensi resmi yang diakui secara nasional maupun internasional bagi operator alat berat.</p><p>Di LPK Buwas Ikigai Nusantara, peserta diberikan pelatihan teori keselamatan kerja, perawatan unit, serta praktek lapangan secara intensif hingga lulus uji kompetensi.</p>",
+    "imageUrl": "/assets/images/heavy-equipment.png",
+    "status": "published",
+    "createdAt": "2026-09-07T07:00:38.129Z",
+    "updatedAt": "2026-09-07T07:00:38.136Z"
+  },
+  {
+    "id": "art-2",
+    "title": "Panduan Perawatan Sistem HVAC & AC Komersial",
+    "slug": "panduan-perawatan-sistem-hvac-ac-komersial",
+    "excerpt": "Tips menjaga efisiensi dan daya tahan sistem pendingin gedung serta industri bersama Procool.",
+    "content": "<p>Sistem HVAC yang terawat dengan baik dapat menghemat konsumsi energi hingga 30% dan mencegah kerusakan mendadak pada unit chiller dan AHU.</p><p>Procool memberikan layanan pemeliharaan berkala dan perbaikan cepat oleh teknisi tersertifikasi.</p>",
+    "imageUrl": "/assets/images/procool-bg.jpg",
+    "status": "published",
+    "createdAt": "2026-09-06T07:00:38.136Z",
+    "updatedAt": "2026-09-06T07:00:38.136Z"
+  }
+]

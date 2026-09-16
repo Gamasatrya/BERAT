@@ -1,0 +1,20 @@
+[
+  {
+    "src": "assets/images/procool-bg.jpg",
+    "alt": "Instalasi AC Komersial",
+    "title": "Instalasi AC Komersial",
+    "desc": "Pemasangan sistem VRF gedung perkantoran"
+  },
+  {
+    "src": "assets/images/procool-bg.jpg",
+    "alt": "Maintenance HVAC Industri",
+    "title": "Maintenance HVAC Industri",
+    "desc": "Perawatan berkala sistem chiller industri"
+  },
+  {
+    "src": "assets/images/procool-bg.jpg",
+    "alt": "Sistem Pendingin VRF",
+    "title": "Sistem Pendingin VRF",
+    "desc": "Instalasi VRF multi-zone untuk hotel berbintang"
+  }
+]

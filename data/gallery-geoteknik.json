@@ -1,0 +1,20 @@
+[
+  {
+    "src": "assets/images/geoteknik-bg.jpg",
+    "alt": "Uji Sondir CPT Lapangan",
+    "title": "Uji Sondir CPT Lapangan",
+    "desc": "Pengujian penetrasi tanah di lokasi proyek"
+  },
+  {
+    "src": "assets/images/geoteknik-bg.jpg",
+    "alt": "Pengeboran Mesin SPT",
+    "title": "Pengeboran Mesin SPT",
+    "desc": "Core drilling dan sampling tanah proyek jembatan"
+  },
+  {
+    "src": "assets/images/geoteknik-bg.jpg",
+    "alt": "Lab Mekanika Tanah",
+    "title": "Lab Mekanika Tanah",
+    "desc": "Analisis sampel tanah di laboratorium"
+  }
+]

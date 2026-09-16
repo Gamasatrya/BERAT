@@ -112,6 +112,15 @@
         })
       : '';
 
+    const isHtml = /<[a-z][\s\S]*>/i.test(article.content || '');
+    const contentHtml = isHtml
+      ? article.content
+      : (article.content || '')
+          .split('\n\n')
+          .filter(function(p) { return p.trim(); })
+          .map(function(p) { return '<p>' + escapeHtml(p.trim()).replace(/\n/g, '<br>') + '</p>'; })
+          .join('');
+
     body.innerHTML =
       (article.imageUrl
         ? '<img src="' + article.imageUrl + '" alt="' + escapeHtml(article.title) + '" style="width:100%;max-height:350px;object-fit:cover;border-radius:10px;margin-bottom:1.5rem;">'
@@ -119,12 +128,7 @@
       (dateStr ? '<p style="color:#9ca3af;font-size:0.85rem;margin-bottom:0.5rem;">' + dateStr + '</p>' : '') +
       '<h2 style="margin-bottom:1rem;font-size:1.6rem;">' + escapeHtml(article.title) + '</h2>' +
       '<div class="article-content" style="line-height:1.8;color:#d1d5db;">' +
-        // Render konten — support newline sebagai paragraf
-        article.content
-          .split('\n\n')
-          .filter(function(p) { return p.trim(); })
-          .map(function(p) { return '<p>' + escapeHtml(p.trim()).replace(/\n/g, '<br>') + '</p>'; })
-          .join('') +
+        contentHtml +
       '</div>';
 
     if (typeof lucide !== 'undefined') lucide.createIcons();

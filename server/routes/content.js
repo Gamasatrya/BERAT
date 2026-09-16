@@ -11,6 +11,14 @@ const testimonialsPath = path.join(dataDir, 'testimonials.json');
 const partnersPath = path.join(dataDir, 'partners.json');
 const faqPath = path.join(dataDir, 'faq.json');
 
+// Per-page gallery file paths
+const PAGE_GALLERY_MAP = {
+  lpk:       path.join(dataDir, 'gallery-lpk.json'),
+  procool:   path.join(dataDir, 'gallery-procool.json'),
+  legal:     path.join(dataDir, 'gallery-legal.json'),
+  geoteknik: path.join(dataDir, 'gallery-geoteknik.json'),
+};
+
 // Helper to read JSON safely
 const readJson = (filePath, defaultData = {}) => {
   if (!fs.existsSync(filePath)) {
@@ -57,14 +65,41 @@ router.put('/sections', authMiddleware, (req, res) => {
   res.json({ message: 'Konten sections berhasil diperbarui', data });
 });
 
+// @route   GET /api/content/gallery/:page
+// @desc    Get per-page gallery — lpk, procool, legal, or geoteknik
+router.get('/gallery/:page', (req, res) => {
+  const page = req.params.page;
+  const filePath = PAGE_GALLERY_MAP[page];
+  if (!filePath) {
+    return res.status(404).json({ message: `Halaman '${page}' tidak ditemukan` });
+  }
+  res.json(readJson(filePath, []));
+});
+
+// @route   PUT /api/content/gallery/:page
+// @desc    Update per-page gallery (protected)
+router.put('/gallery/:page', authMiddleware, (req, res) => {
+  const page = req.params.page;
+  const filePath = PAGE_GALLERY_MAP[page];
+  if (!filePath) {
+    return res.status(404).json({ message: `Halaman '${page}' tidak ditemukan` });
+  }
+  const data = req.body;
+  if (!Array.isArray(data)) {
+    return res.status(400).json({ message: 'Data galeri harus berupa array' });
+  }
+  writeJson(filePath, data);
+  res.json({ message: `Galeri ${page} berhasil diperbarui`, data });
+});
+
 // @route   GET /api/content/gallery
-// @desc    Get gallery items
+// @desc    Get shared gallery items (backward compat)
 router.get('/gallery', (req, res) => {
   res.json(readJson(galleryPath, []));
 });
 
 // @route   PUT /api/content/gallery
-// @desc    Update gallery items (protected)
+// @desc    Update shared gallery items (protected)
 router.put('/gallery', authMiddleware, (req, res) => {
   const data = req.body;
   if (!Array.isArray(data)) {
@@ -75,13 +110,11 @@ router.put('/gallery', authMiddleware, (req, res) => {
 });
 
 // @route   GET /api/content/testimonials
-// @desc    Get testimonials
 router.get('/testimonials', (req, res) => {
   res.json(readJson(testimonialsPath, []));
 });
 
-// @route   PUT /api/content/testimonials
-// @desc    Update testimonials (protected)
+// @route   PUT /api/content/testimonials (protected)
 router.put('/testimonials', authMiddleware, (req, res) => {
   const data = req.body;
   if (!Array.isArray(data)) {
@@ -92,13 +125,11 @@ router.put('/testimonials', authMiddleware, (req, res) => {
 });
 
 // @route   GET /api/content/partners
-// @desc    Get partners
 router.get('/partners', (req, res) => {
   res.json(readJson(partnersPath, []));
 });
 
-// @route   PUT /api/content/partners
-// @desc    Update partners (protected)
+// @route   PUT /api/content/partners (protected)
 router.put('/partners', authMiddleware, (req, res) => {
   const data = req.body;
   if (!Array.isArray(data)) {
@@ -109,13 +140,11 @@ router.put('/partners', authMiddleware, (req, res) => {
 });
 
 // @route   GET /api/content/faq
-// @desc    Get FAQ items
 router.get('/faq', (req, res) => {
   res.json(readJson(faqPath, []));
 });
 
-// @route   PUT /api/content/faq
-// @desc    Update FAQ items (protected)
+// @route   PUT /api/content/faq (protected)
 router.put('/faq', authMiddleware, (req, res) => {
   const data = req.body;
   if (!Array.isArray(data)) {

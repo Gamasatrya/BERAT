@@ -39,3 +39,11 @@
 - [x] Performance optimization
 - [x] Accessibility check
 - [x] Final walkthrough
+
+## Phase 8: Multi-Landing Page & Per-Page Gallery Management
+- [x] API endpoints galeri per-unit (`/api/content/gallery/:page` untuk lpk, procool, legal, geoteknik)
+- [x] Panel pengelola galeri di Admin untuk tiap landing page (LPK, Procool, Konsultasi Hukum, Jasa Geoteknik)
+- [x] Integrasi upload & Media Selector modal untuk setiap galeri
+- [x] Live fetch & render galeri di masing-masing landing page (`lpk.html`, `procool.html`, `konsultasi-hukum.html`, `jasa-geoteknik.html`, dan `index.html`)
+- [x] Lightbox modal interaktif untuk semua galeri landing page
+
